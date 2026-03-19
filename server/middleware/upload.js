@@ -1,0 +1,34 @@
+const multer = require('multer');
+const path = require('path');
+
+// Set storage engine
+const storage = multer.diskStorage({
+  destination: './uploads/resumes/',
+  filename: function(req, file, cb) {
+    cb(null, `${req.user.id}-${Date.now()}${path.extname(file.originalname)}`);
+  }
+});
+
+// Check file type
+function checkFileType(file, cb) {
+  const filetypes = /pdf|doc|docx/;
+  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = filetypes.test(file.mimetype);
+
+  if (mimetype && extname) {
+    return cb(null, true);
+  } else {
+    cb('Error: PDF and Word documents only!');
+  }
+}
+
+// Init upload
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5000000 }, // 5MB limit
+  fileFilter: function(req, file, cb) {
+    checkFileType(file, cb);
+  }
+}).single('resume');
+
+module.exports = upload;

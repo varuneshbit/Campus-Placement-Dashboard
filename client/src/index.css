@@ -1,0 +1,359 @@
+@import "tailwindcss";
+
+:root {
+  --primary: 255 65% 60%;
+  --secondary: 180 70% 45%;
+
+  /* Color Palette */
+  --color-primary: #4f46e5;      /* Indigo 600 */
+  --color-primary-dark: #4338ca; /* Indigo 700 */
+  --color-accent: #8b5cf6;       /* Violet 500 */
+  --color-bg: #f8fafc;           /* Slate 50 */
+  --color-surface: #ffffff;
+  --color-text-main: #0f172a;    /* Slate 900 */
+  --color-text-muted: #64748b;   /* Slate 500 */
+  --color-border: #f1f5f9;       /* Slate 100 */
+
+  /* UI Variables */
+  --radius-sm: 0.5rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-premium: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body {
+  @apply bg-slate-50 text-slate-900;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text-main);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* =========================================
+   1. BRAND LOGO STYLING 
+   ========================================= */
+.brand-logo {
+  font-size: 1.75rem;
+  font-weight: 900;
+  letter-spacing: -0.025em;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0px 2px 4px rgba(79, 70, 229, 0.15); /* Adds deep visibility */
+  display: inline-block;
+}
+
+
+/* =========================================
+   2. NAVBAR ACTIVE STATE & EFFECTS
+   ========================================= */
+.nav-link {
+  position: relative;
+  transition: var(--transition-smooth);
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+  transition: width 0.3s ease-in-out;
+  border-radius: 2px;
+}
+
+.nav-link:hover {
+  color: var(--color-primary-dark);
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+/* Specific Active State for Top Navbar */
+.nav-link.active {
+  font-weight: 700;
+  color: var(--color-primary-dark);
+}
+.nav-link.active::after {
+  width: 100%;
+}
+
+/* Specific Sidebar Item Active State */
+.sidebar-link {
+  transition: var(--transition-smooth);
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar-link:hover {
+  transform: translateX(4px);
+  background-color: var(--color-bg);
+  color: var(--color-text-main);
+}
+
+.sidebar-link.active {
+  background: linear-gradient(90deg, rgba(79,70,229,0.1) 0%, rgba(79,70,229,0.02) 100%);
+  color: var(--color-primary-dark);
+  font-weight: 600;
+  border-right: 3px solid var(--color-primary);
+}
+
+
+/* =========================================
+   3. GLOBAL BUTTON & CARD EFFECTS
+   ========================================= */
+.btn-modern {
+  transition: var(--transition-smooth);
+}
+
+.btn-modern:hover {
+  transform: scale(1.03) translateY(-2px);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+}
+
+.btn-modern:active {
+  transform: scale(0.98);
+}
+
+.card-modern {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border);
+  transition: var(--transition-smooth);
+}
+
+.card-modern:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-premium);
+  border-color: rgba(79, 70, 229, 0.2);
+}
+
+/* =========================================
+   4. SKELETON LOADER & TIMELINE
+   ========================================= */
+.skeleton-box {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Timeline specific styles */
+.interview-timeline {
+  position: relative;
+  padding-left: 2rem;
+}
+
+.interview-timeline::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 7px;
+  width: 2px;
+  background: var(--color-border);
+}
+
+.timeline-node {
+  position: absolute;
+  left: -2rem;
+  top: 1.5rem;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 3px solid var(--color-surface);
+  background-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  z-index: 2;
+}
+
+.timeline-node.completed {
+  background-color: #10b981; /* Emerald */
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.timeline-node.rejected {
+  background-color: #f43f5e; /* Rose */
+  box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.1);
+}
+
+/* =========================================
+   5. CALENDAR CUSTOM UI OVERRIDES
+   ========================================= */
+.calendar-container .rbc-toolbar {
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.calendar-container .rbc-toolbar button {
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  font-weight: 600;
+  transition: var(--transition-smooth);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.calendar-container .rbc-toolbar button:hover {
+  background: var(--color-bg);
+  color: var(--color-text-main);
+  transform: translateY(-1px);
+}
+
+.calendar-container .rbc-toolbar button:active,
+.calendar-container .rbc-toolbar button.rbc-active {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary-dark);
+  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.25);
+}
+
+.calendar-container .rbc-toolbar-label {
+  font-family: inherit;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--color-text-main);
+}
+
+.calendar-container .rbc-month-view,
+.calendar-container .rbc-time-view,
+.calendar-container .rbc-agenda-view {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  background: var(--color-surface);
+}
+
+.calendar-container .rbc-header {
+  padding: 12px 8px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg);
+}
+
+.calendar-container .rbc-day-bg {
+  border-left: 1px solid var(--color-border);
+  transition: background-color 0.2s;
+}
+
+.calendar-container .rbc-day-bg:hover {
+  background-color: #f8fafc;
+}
+
+.calendar-container .rbc-today {
+  background-color: rgba(79, 70, 229, 0.05); /* Slightly darker primary highlight */
+  border: 1px solid rgba(79, 70, 229, 0.4);
+}
+
+.calendar-container .rbc-today .rbc-date-cell {
+  background: var(--color-primary);
+  color: white;
+  border-radius: 4px;
+  display: inline-block;
+  padding: 2px 8px;
+  margin: 4px;
+}
+
+.calendar-container .rbc-event {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.calendar-container .rbc-event:hover {
+  transform: scale(1.02) translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  filter: brightness(1.1);
+  z-index: 5;
+}
+
+/* =========================================
+   6. EXPLICIT UI MODULAR CLASSES (User Requested)
+   ========================================= */
+
+/* Navigation Buttons */
+.btn {
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  cursor: pointer;
+}
+
+.btn:hover {
+  background-color: var(--color-bg);
+  color: var(--color-text-main);
+  transform: scale(1.05);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.btn-active, .btn:active {
+  background-color: var(--color-border);
+  color: var(--color-text-main);
+  transform: scale(0.95);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.15);
+}
+
+/* Base structural overrides for CustomToolbar */
+.rbc-toolbar-custom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.rbc-toolbar-custom .toolbar-controls {
+  display: flex;
+  gap: 8px;
+}
+.rbc-toolbar-custom .toolbar-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--color-text-main);
+}
+
+/* Calendar Day Cells */
+.calendar-cell {
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border-left: 1px solid var(--color-border);
+}
+
+.calendar-cell:hover {
+  background-color: rgba(139, 92, 246, 0.1); /* light blue/purple shade */
+  transform: scale(1.02);
+  transform-origin: center;
+  box-shadow: inset 0 0 0 2px rgba(139, 92, 246, 0.4); /* border highlight */
+  z-index: 2;
+}
+
+.calendar-cell-active {
+  background-color: rgba(139, 92, 246, 0.2) !important; /* solid highlight color */
+  transform: scale(0.98);
+  box-shadow: inset 0 2px 8px rgba(139, 92, 246, 0.3);
+}
+
+.calendar-cell-today {
+  background-color: rgba(79, 70, 229, 0.05);
+  box-shadow: inset 0 0 0 1px rgba(79, 70, 229, 0.4);
+}
