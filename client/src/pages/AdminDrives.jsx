@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../components/AdminLayout';
+import { useForm } from 'react-hook-form';
 import { 
   Plus, 
   Calendar, 
@@ -22,15 +23,19 @@ const AdminDrives = () => {
   const [showModal, setShowModal] = useState(false);
   const [showApplicantsModal, setShowApplicantsModal] = useState(false);
   const [currentApplicants, setCurrentApplicants] = useState([]);
-  const [formData, setFormData] = useState({
-    driveName: '',
-    companyId: '',
-    jobRole: '',
-    salary: '',
-    date: '',
-    batch: '',
-    eligibility: { minCGPA: 0, branches: [] },
-    registrationStatus: 'upcoming'
+  
+  const { register, handleSubmit, reset, formState: { errors } } = useForm({
+    defaultValues: {
+      driveName: '',
+      companyId: '',
+      jobRole: '',
+      jobDescription: '',
+      salary: '',
+      date: '',
+      batch: '',
+      eligibility: { minCGPA: 0, branches: [] },
+      registrationStatus: 'upcoming'
+    }
   });
 
   useEffect(() => {
@@ -76,11 +81,25 @@ const AdminDrives = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleOpenModal = () => {
+    reset({
+      driveName: '',
+      companyId: '',
+      jobRole: '',
+      jobDescription: '',
+      salary: '',
+      date: '',
+      batch: '',
+      eligibility: { minCGPA: 0, branches: [] },
+      registrationStatus: 'upcoming'
+    });
+    setShowModal(true);
+  };
+
+  const onSubmit = async (data) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:5000/api/drives', formData, {
+      await axios.post('http://localhost:5000/api/drives', data, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setShowModal(false);
@@ -113,7 +132,7 @@ const AdminDrives = () => {
             <p className="text-slate-500">Schedule and manage recruitment events.</p>
           </div>
           <button 
-            onClick={() => setShowModal(true)}
+            onClick={handleOpenModal}
             className="bg-primary text-white px-5 py-2.5 rounded-xl font-medium flex items-center gap-2 hover:bg-primary-dark transition-all shadow-md"
           >
             <Plus size={20} /> Create Drive
@@ -198,38 +217,83 @@ const AdminDrives = () => {
               </button>
             </div>
             
-            <form onSubmit={handleSubmit} className="p-8 space-y-6 overflow-y-auto max-h-[70vh]">
+            <form onSubmit={handleSubmit(onSubmit)} className="p-8 space-y-6 overflow-y-auto max-h-[70vh]">
               <div className="grid grid-cols-2 gap-6">
                 <div className="col-span-2">
                   <label className="block text-sm font-semibold text-slate-700 mb-2">Drive Name</label>
-                  <input type="text" required value={formData.driveName} onChange={(e) => setFormData({...formData, driveName: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all" />
+                  <input 
+                    type="text" 
+                    {...register('driveName', { required: 'Drive Name is required' })} 
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all" 
+                  />
+                  {errors.driveName && <p className="text-rose-500 text-xs mt-1">{errors.driveName.message}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-2">Company</label>
-                  <select required value={formData.companyId} onChange={(e) => setFormData({...formData, companyId: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all">
+                  <select 
+                    {...register('companyId', { required: 'Company is required' })} 
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all"
+                  >
                     <option value="">Select Company</option>
                     {companies.map(c => <option key={c._id} value={c._id}>{c.companyName}</option>)}
                   </select>
+                  {errors.companyId && <p className="text-rose-500 text-xs mt-1">{errors.companyId.message}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-2">Job Role</label>
-                  <input type="text" required value={formData.jobRole} onChange={(e) => setFormData({...formData, jobRole: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all" />
+                  <input 
+                    type="text" 
+                    {...register('jobRole', { required: 'Job Role is required' })} 
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all" 
+                  />
+                  {errors.jobRole && <p className="text-rose-500 text-xs mt-1">{errors.jobRole.message}</p>}
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">Job Description</label>
+                  <textarea 
+                    rows="4"
+                    {...register('jobDescription', { required: 'Job Description is required' })} 
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all resize-none" 
+                  ></textarea>
+                  {errors.jobDescription && <p className="text-rose-500 text-xs mt-1">{errors.jobDescription.message}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-2">Salary Package</label>
-                  <input type="text" required value={formData.salary} onChange={(e) => setFormData({...formData, salary: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all" />
+                  <input 
+                    type="text" 
+                    {...register('salary', { required: 'Salary is required' })} 
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all" 
+                  />
+                  {errors.salary && <p className="text-rose-500 text-xs mt-1">{errors.salary.message}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-2">Date</label>
-                  <input type="date" required value={formData.date} onChange={(e) => setFormData({...formData, date: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all" />
+                  <input 
+                    type="date" 
+                    {...register('date', { required: 'Date is required' })} 
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all" 
+                  />
+                  {errors.date && <p className="text-rose-500 text-xs mt-1">{errors.date.message}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-2">Batch</label>
-                  <input type="text" required placeholder="e.g. 2024" value={formData.batch} onChange={(e) => setFormData({...formData, batch: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all" />
+                  <input 
+                    type="text" 
+                    placeholder="e.g. 2024" 
+                    {...register('batch', { required: 'Batch is required' })} 
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all" 
+                  />
+                  {errors.batch && <p className="text-rose-500 text-xs mt-1">{errors.batch.message}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-2">Min CGPA</label>
-                  <input type="number" step="0.1" required value={formData.eligibility.minCGPA} onChange={(e) => setFormData({...formData, eligibility: {...formData.eligibility, minCGPA: e.target.value}})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all" />
+                  <input 
+                    type="number" 
+                    step="0.1" 
+                    {...register('eligibility.minCGPA', { required: 'Min CGPA is required', min: {value: 0, message: 'Minimum 0'} })} 
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all" 
+                  />
+                  {errors.eligibility?.minCGPA && <p className="text-rose-500 text-xs mt-1">{errors.eligibility.minCGPA.message}</p>}
                 </div>
               </div>
 

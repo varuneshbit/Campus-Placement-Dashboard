@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, Search, UserCircle, Check, X, Clock } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Bell, Search, Check, Clock, Mail, ChevronDown, User, LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 
 const Navbar = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -65,24 +66,24 @@ const Navbar = () => {
         />
       </div>
 
-      <div className="flex items-center gap-6">
+      <div className="flex items-center bg-white rounded-full px-2 py-1.5 shadow-sm border border-slate-200">
+        
+        {/* Bell Icon with existing Notifications Logic */}
         <div className="relative">
           <button 
             onClick={() => setShowNotifications(!showNotifications)}
-            className={`relative p-2.5 rounded-xl transition-all ${showNotifications ? 'bg-primary/10 text-primary' : 'text-slate-500 hover:bg-slate-50'}`}
+            className={`relative p-2 rounded-full transition-all ${showNotifications ? 'bg-slate-100 text-slate-800' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
           >
-            <Bell size={22} />
+            <Bell size={20} />
             {unreadCount > 0 && (
-              <span className="absolute top-2 right-2.5 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full border-2 border-white flex items-center justify-center">
-                {unreadCount > 9 ? '9+' : unreadCount}
-              </span>
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 border-2 border-white rounded-full box-content"></span>
             )}
           </button>
 
           {showNotifications && (
             <>
               <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)}></div>
-              <div className="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-premium border border-slate-100 z-50 overflow-hidden">
+              <div className="absolute right-0 mt-4 w-80 bg-white rounded-2xl shadow-premium border border-slate-100 z-50 overflow-hidden transform origin-top-right">
                 <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                   <h3 className="font-bold text-slate-900">Notifications</h3>
                   {unreadCount > 0 && (
@@ -138,15 +139,39 @@ const Navbar = () => {
           )}
         </div>
 
-        <div className="flex items-center gap-3 pl-6 border-l border-slate-100">
-          <div className="text-right hidden sm:block">
-            <p className="text-sm font-semibold text-slate-900">{user?.name || 'Admin'}</p>
-            <p className="text-xs text-slate-500 capitalize">{user?.role || 'Administrator'}</p>
-          </div>
-          <div className="w-10 h-10 bg-gradient-to-br from-primary to-purple-800 rounded-full flex items-center justify-center text-white font-bold shadow-sm">
-            {user?.name?.[0] || 'A'}
+        <div className="w-[1px] h-5 bg-slate-200 mx-1"></div>
+
+        {/* User Profile Dropdown */}
+        <div className="relative group">
+          <button className="flex items-center gap-2 pl-1.5 pr-3 py-1 rounded-full hover:bg-slate-50 transition-all">
+            {user?.profileImageURL ? (
+              <img src={user.profileImageURL} alt="Profile" className="w-8 h-8 rounded-full object-cover" />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-purple-800 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                {user?.name?.[0] || 'A'}
+              </div>
+            )}
+            <ChevronDown size={16} className="text-slate-400" />
+          </button>
+          
+          {/* Dropdown Menu */}
+          <div className="absolute right-0 mt-3 w-56 bg-white border border-slate-100 rounded-2xl shadow-premium opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 transform origin-top-right scale-95 group-hover:scale-100 overflow-hidden">
+            <div className="p-4 border-b border-slate-100">
+              <p className="text-sm font-bold text-slate-900 truncate">{user?.name || 'Admin'}</p>
+              <p className="text-xs text-slate-500 truncate capitalize">{user?.role || 'Administrator'}</p>
+            </div>
+            <div className="p-2">
+              <Link 
+                to={user?.role === 'admin' ? "/admin/dashboard" : "/student/profile"}
+                className="flex items-center gap-2 px-3 py-2 text-sm text-slate-600 hover:text-primary hover:bg-slate-50 rounded-lg transition-colors"
+              >
+                <User size={16} />
+                <span>My Profile</span>
+              </Link>
+            </div>
           </div>
         </div>
+
       </div>
     </header>
   );

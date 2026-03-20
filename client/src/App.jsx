@@ -14,6 +14,9 @@ import StudentInterviews from './pages/StudentInterviews';
 import PlacementCalendar from './pages/PlacementCalendar';
 import Leaderboard from './pages/Leaderboard';
 import ProtectedRoute from './components/ProtectedRoute';
+import StudentProfile from './pages/StudentProfile';
+import StudentDrives from './pages/StudentDrives';
+import StudentResume from './pages/StudentResume';
 
 function App() {
   return (
@@ -95,6 +98,24 @@ function App() {
           />
 
           <Route 
+            path="/student/drives" 
+            element={
+              <ProtectedRoute roles={['student']}>
+                <StudentDrives />
+              </ProtectedRoute>
+            } 
+          />
+
+          <Route 
+            path="/student/resume" 
+            element={
+              <ProtectedRoute roles={['student']}>
+                <StudentResume />
+              </ProtectedRoute>
+            } 
+          />
+
+          <Route 
             path="/student/interviews" 
             element={
               <ProtectedRoute roles={['student']}>
@@ -135,6 +156,15 @@ function App() {
             element={
               <ProtectedRoute roles={['student']}>
                 <Leaderboard />
+              </ProtectedRoute>
+            } 
+          />
+
+          <Route 
+            path="/student/profile" 
+            element={
+              <ProtectedRoute roles={['student']}>
+                <StudentProfile />
               </ProtectedRoute>
             } 
           />

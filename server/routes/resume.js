@@ -1,6 +1,7 @@
 const express = require('express');
 const { analyzeResume } = require('../controllers/resumeController');
 const { protect, authorize } = require('../middleware/auth');
+const { uploadResume } = require('../middleware/upload');
 
 const router = express.Router();
 
@@ -8,6 +9,6 @@ const router = express.Router();
 router.use(protect);
 router.use(authorize('student'));
 
-router.get('/analyze', analyzeResume);
+router.post('/analyze', uploadResume, analyzeResume);
 
 module.exports = router;

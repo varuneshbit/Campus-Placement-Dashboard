@@ -1,158 +1,164 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import StudentLayout from '../components/StudentLayout';
 import { 
-  Plus, 
-  Calendar, 
+  Users, 
+  Building2, 
   Briefcase, 
   CheckCircle, 
-  MapPin, 
   DollarSign, 
-  Zap,
-  ArrowRight,
-  ClipboardList,
-  Building2,
-  Video
+  TrendingUp 
 } from 'lucide-react';
-import axios from 'axios';
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer, 
+  AreaChart, 
+  Area,
+  Cell
+} from 'recharts';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import ResumeManagement from '../components/ResumeManagement';
-import StudentLayout from '../components/StudentLayout';
+
+const stats = [
+  { label: 'Total Students', value: '1,284', icon: <Users />, color: 'bg-blue-500', trend: '+12%' },
+  { label: 'Total Companies', value: '48', icon: <Building2 />, color: 'bg-indigo-500', trend: '+5%' },
+  { label: 'Placement Drives', value: '32', icon: <Briefcase />, color: 'bg-purple-500', trend: '+8%' },
+  { label: 'Students Placed', value: '842', icon: <CheckCircle />, color: 'bg-emerald-500', trend: '82%' },
+  { label: 'Highest Salary', value: '42 LPA', icon: <DollarSign />, color: 'bg-amber-500', trend: 'Microsoft' },
+  { label: 'Average Salary', value: '8.4 LPA', icon: <TrendingUp />, color: 'bg-rose-500', trend: '+1.2L' },
+];
+
+const batchData = [
+  { batch: '2021', placed: 420, total: 500 },
+  { batch: '2022', placed: 480, total: 550 },
+  { batch: '2023', placed: 520, total: 600 },
+  { batch: '2024', placed: 580, total: 650 },
+];
+
+const hiringData = [
+  { name: 'Google', count: 12 },
+  { name: 'Amazon', count: 18 },
+  { name: 'Microsoft', count: 15 },
+  { name: 'TCS', count: 45 },
+  { name: 'Infosys', count: 38 },
+  { name: 'Accenture', count: 32 },
+];
+
+const trendData = [
+  { month: 'Jan', drives: 4 },
+  { month: 'Feb', drives: 6 },
+  { month: 'Mar', drives: 12 },
+  { month: 'Apr', drives: 18 },
+  { month: 'May', drives: 10 },
+  { month: 'Jun', drives: 8 },
+];
 
 const StudentDashboard = () => {
-  const [drives, setDrives] = useState([]);
-  const [interviews, setInterviews] = useState([]);
-  const [loading, setLoading] = useState(true);
   const { user } = useAuth();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const [driveRes, intRes] = await Promise.all([
-        axios.get('/api/drives', { headers: { Authorization: `Bearer ${token}` }}),
-        axios.get('/api/interviews/student', { headers: { Authorization: `Bearer ${token}` }})
-      ]);
-      setDrives(driveRes.data.data);
-      setInterviews(intRes.data.data);
-      setLoading(false);
-    } catch (err) {
-      console.error(err);
-      setLoading(false);
-    }
-  };
-
-  const handleApply = async (driveId) => {
-    try {
-      const token = localStorage.getItem('token');
-      await axios.post(`/api/drives/${driveId}/apply`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      alert('Applied successfully!');
-      fetchData();
-    } catch (err) {
-      alert(err.response?.data?.message || 'Application failed');
-    }
-  };
 
   return (
     <StudentLayout>
       <div className="space-y-8">
+        {/* Page Header */}
         <div>
-          <h2 className="text-3xl font-extrabold text-slate-900 font-display">Welcome, {user?.name}!</h2>
-          <p className="text-slate-500">Track your applications and explore new opportunities.</p>
+          <h2 className="text-3xl font-extrabold text-slate-900 font-display">Dashboard Overview</h2>
+          <p className="text-slate-500">Welcome back, {user?.name || 'Student'}! Here's what's happening globally today.</p>
         </div>
 
-        {/* Resume Management */}
-        <ResumeManagement />
-
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-           <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
-              <div className="w-12 h-12 bg-indigo-50 text-primary rounded-xl flex items-center justify-center"><Briefcase size={24}/></div>
-              <div><p className="text-sm text-slate-500">Applied Drives</p><p className="text-2xl font-bold">{drives.filter(d => d.applicants.some(a => a.studentId === user.id)).length}</p></div>
-           </div>
-           <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
-              <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center"><Zap size={24}/></div>
-              <div><p className="text-sm text-slate-500">Open Opportunities</p><p className="text-2xl font-bold">{drives.filter(d => d.registrationStatus === 'open').length}</p></div>
-           </div>
-           <div 
-             onClick={() => navigate('/student/interviews')}
-             className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4 cursor-pointer hover:border-primary transition-all"
-           >
-              <div className="w-12 h-12 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center"><Calendar size={24}/></div>
-              <div><p className="text-sm text-slate-500">Upcoming Interviews</p><p className="text-2xl font-bold">{interviews.filter(i => i.status === 'scheduled').length}</p></div>
-           </div>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+          {stats.map((stat, index) => (
+            <div key={index} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-all group">
+              <div className={`w-12 h-12 ${stat.color} text-white rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                {React.cloneElement(stat.icon, { size: 24 })}
+              </div>
+              <p className="text-sm font-medium text-slate-500">{stat.label}</p>
+              <div className="flex items-end justify-between mt-1">
+                <h3 className="text-2xl font-bold text-slate-900">{stat.value}</h3>
+                <span className={`text-xs font-semibold px-2 py-1 rounded-lg ${
+                    stat.trend.includes('+') ? 'bg-emerald-50 text-emerald-600' : 'bg-blue-50 text-blue-600'
+                }`}>
+                  {stat.trend}
+                </span>
+              </div>
+            </div>
+          ))}
         </div>
 
-        <div>
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xl font-bold text-slate-900 font-display flex items-center gap-2">
-              <ClipboardList size={22} className="text-primary" /> Eligible Placement Drives
-            </h3>
+        {/* Charts Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Placement by Batch */}
+          <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
+            <h3 className="text-lg font-bold text-slate-900 mb-6 font-display">Placement Statistics by Batch</h3>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={batchData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="batch" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
+                  <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
+                    cursor={{fill: '#f8fafc'}}
+                  />
+                  <Bar dataKey="placed" fill="url(#colorPlaced)" radius={[6, 6, 0, 0]} />
+                  <defs>
+                    <linearGradient id="colorPlaced" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(255, 65%, 60%)" stopOpacity={1}/>
+                      <stop offset="95%" stopColor="hsl(255, 65%, 40%)" stopOpacity={1}/>
+                    </linearGradient>
+                  </defs>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {loading ? (
-              <p>Loading drives...</p>
-            ) : drives.map(drive => {
-              const isApplied = drive.applicants.some(a => a.studentId === user.id);
-              return (
-                <div key={drive._id} className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-xl transition-all group overflow-hidden relative">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -mr-16 -mt-16 group-hover:bg-primary/10 transition-colors"></div>
-                  
-                  <div className="flex justify-between items-start mb-6">
-                    <div>
-                      <h4 className="text-xl font-bold text-slate-900">{drive.driveName}</h4>
-                      <p className="text-slate-500 flex items-center gap-1.5 mt-1 font-medium">
-                        <Building2 size={16} /> {drive.companyId?.companyName}
-                      </p>
-                    </div>
-                    <div className="bg-primary/10 text-primary p-3 rounded-2xl">
-                       <Briefcase size={20} />
-                    </div>
-                  </div>
+          {/* Monthly Trends */}
+          <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
+            <h3 className="text-lg font-bold text-slate-900 mb-6 font-display">Monthly Drive Trends</h3>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={trendData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
+                  <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
+                  />
+                  <Area type="monotone" dataKey="drives" stroke="hsl(180, 70%, 45%)" fill="url(#colorDrives)" strokeWidth={3} />
+                  <defs>
+                    <linearGradient id="colorDrives" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(180, 70%, 45%)" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="hsl(180, 70%, 45%)" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
 
-                  <div className="grid grid-cols-2 gap-y-4 mb-8">
-                     <div className="flex items-center gap-2 text-sm text-slate-600">
-                        <MapPin size={16} className="text-slate-400" /> {drive.companyId?.location}
-                     </div>
-                     <div className="flex items-center gap-2 text-sm text-emerald-600 font-bold">
-                        <DollarSign size={16} /> {drive.salary}
-                     </div>
-                     <div className="flex items-center gap-2 text-sm text-slate-600">
-                        <Calendar size={16} className="text-slate-400" /> {new Date(drive.date).toLocaleDateString()}
-                     </div>
-                     <div className="flex items-center gap-2 text-sm text-slate-600">
-                        <CheckCircle size={16} className="text-slate-400" /> CGPA: {drive.eligibility?.minCGPA}+
-                     </div>
-                  </div>
-
-                  <button 
-                    disabled={isApplied || drive.registrationStatus !== 'open'}
-                    onClick={() => handleApply(drive._id)}
-                    className={`w-full py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 ${
-                      isApplied 
-                        ? 'bg-emerald-50 text-emerald-600 cursor-default' 
-                        : drive.registrationStatus === 'open'
-                        ? 'bg-primary text-white hover:bg-primary-dark shadow-lg shadow-primary/20 hover:-translate-y-1'
-                        : 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                    }`}
-                  >
-                    {isApplied ? (
-                      <><CheckCircle size={20} /> Applied Successfully</>
-                    ) : drive.registrationStatus === 'open' ? (
-                      <><Zap size={20} /> Apply Now</>
-                    ) : (
-                      'Registration Closed'
-                    )}
-                  </button>
-                </div>
-              );
-            })}
+          {/* Company Hiring */}
+          <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 lg:col-span-2">
+            <h3 className="text-lg font-bold text-slate-900 mb-6 font-display">Major Hiring Companies</h3>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={hiringData} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
+                  <XAxis type="number" hide />
+                  <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} width={100} />
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
+                  />
+                  <Bar dataKey="count" radius={[0, 6, 6, 0]}>
+                    {hiringData.map((entry, index) => (
+                      <Cell key={index} fill={index % 2 === 0 ? 'hsl(255, 65%, 60%)' : 'hsl(180, 70%, 45%)'} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </div>
       </div>

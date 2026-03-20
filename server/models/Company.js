@@ -4,8 +4,7 @@ const companySchema = new mongoose.Schema({
   companyName: { type: String, required: true, unique: true, trim: true },
   salary: { type: String, required: true },
   location: { type: String, required: true },
-  jobRole: { type: String, required: true },
-  description: { type: String },
+  companyDescription: { type: String, maxlength: 1000 },
   hiringStats: {
     previousOffers: { type: Number, default: 0 },
     lastHiringYear: { type: String },

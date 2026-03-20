@@ -25,7 +25,6 @@ const Sidebar = () => {
     { title: 'Calendar', icon: <Calendar size={20} />, path: '/admin/calendar' },
     { title: 'Leaderboard', icon: <Trophy size={20} />, path: '/admin/leaderboard' },
     { title: 'Students', icon: <Users size={20} />, path: '/admin/students' },
-    { title: 'Verification', icon: <FileCheck size={20} />, path: '/admin/verification' },
     { title: 'Analytics', icon: <BarChart3 size={20} />, path: '/admin/analytics' },
   ];
 

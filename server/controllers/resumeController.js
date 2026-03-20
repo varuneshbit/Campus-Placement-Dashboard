@@ -2,107 +2,101 @@ const Student = require('../models/Student');
 const fs = require('fs');
 const path = require('path');
 const pdfParse = require('pdf-parse');
+const mammoth = require('mammoth');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
-// Basic dictionary for skills matching
-const SKILL_DICTIONARY = [
-    'javascript', 'python', 'java', 'c++', 'c#', 'react', 'node.js', 'express', 
-    'mongodb', 'sql', 'mysql', 'postgresql', 'aws', 'docker', 'kubernetes', 
-    'git', 'html', 'css', 'typescript', 'angular', 'vue', 'django', 'flask', 
-    'spring', 'hibernate', 'agile', 'scrum', 'leadership', 'communication',
-    'problem solving', 'machine learning', 'data science', 'ai'
-];
-
-// Sections to look for
-const SECTIONS = ['education', 'experience', 'projects', 'skills', 'certifications'];
+// Initialize Gemini (Ensure GEMINI_API_KEY is in your .env file)
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // @desc    Analyze uploaded resume
-// @route   GET /api/resume/analyze
+// @route   POST /api/resume/analyze
 exports.analyzeResume = async (req, res) => {
     try {
         const student = await Student.findOne({ user: req.user.id });
-        if (!student || !student.resumeURL) {
-            return res.status(404).json({ success: false, message: 'No resume found. Please upload one first.' });
+        if (!student) {
+            return res.status(404).json({ success: false, message: 'Student not found.' });
         }
 
-        // Only handle PDFs currently for text parsing, return basic for DOCX
-        if (!student.resumeURL.toLowerCase().endsWith('.pdf')) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'AI Analyzer currently only supports PDF resumes.' 
-            });
-        }
-
-        const resumePath = student.resumeURL.startsWith('/') ? student.resumeURL.substring(1) : student.resumeURL;
-        const filePath = path.join(__dirname, '..', resumePath);
-        if (!fs.existsSync(filePath)) {
-            return res.status(404).json({ success: false, message: `Resume file missing on server. Looking at: ${filePath}` });
-        }
-
-        // Parse PDF
-        const dataBuffer = fs.readFileSync(filePath);
-        const data = await pdfParse(dataBuffer);
-        const text = data.text.toLowerCase();
-
-        // 1. Extract Skills
-        const foundSkills = [];
-        for (const skill of SKILL_DICTIONARY) {
-            if (text.includes(skill)) {
-                foundSkills.push(skill);
-            }
-        }
-
-        // 2. Identify Sections
-        const foundSections = [];
-        const missingSections = [];
-        for (const section of SECTIONS) {
-            if (text.includes(section)) {
-                foundSections.push(section);
-            } else {
-                missingSections.push(section);
-            }
-        }
-
-        // 3. Generate Score (Simulated)
-        let score = 50; // Base score
-        const wordCount = text.split(/\s+/).length;
-
-        if (wordCount > 300 && wordCount < 800) score += 10; // Good length
-        if (wordCount > 800) score += 5; // Maybe too long but okay
+        let filePath = '';
         
-        score += Math.min(foundSkills.length * 2, 20); // Up to 20 pts for skills
-        score += Math.min(foundSections.length * 4, 20); // Up to 20 pts for sections
+        // If a new file was uploaded, use it. Save it as the new resume URL.
+        if (req.file) {
+            filePath = req.file.path;
+            student.resumeURL = `/uploads/resumes/${req.file.filename}`;
+        } else if (student.resumeURL) {
+            // Use existing file
+            const resumePath = student.resumeURL.startsWith('/') ? student.resumeURL.substring(1) : student.resumeURL;
+            filePath = path.join(__dirname, '..', resumePath);
+        } else {
+            return res.status(400).json({ success: false, message: 'No resume found. Please upload one first.' });
+        }
 
-        // Cap at 100
-        score = Math.min(score, 100);
+        if (!fs.existsSync(filePath)) {
+            return res.status(404).json({ success: false, message: 'Resume file missing on server.' });
+        }
 
-        // 4. Generate Suggestions
-        const suggestions = [];
-        if (missingSections.includes('experience')) {
-            suggestions.push('Consider adding an "Experience" section. If you lack formal experience, include internships or relevant student clubs.');
+        // Extract Text
+        let text = '';
+        const ext = path.extname(filePath).toLowerCase();
+        
+        if (ext === '.pdf') {
+            const dataBuffer = fs.readFileSync(filePath);
+            const data = await pdfParse(dataBuffer);
+            text = data.text;
+        } else if (ext === '.doc' || ext === '.docx') {
+            const result = await mammoth.extractRawText({ path: filePath });
+            text = result.value;
+        } else {
+            return res.status(400).json({ success: false, message: 'Unsupported file type. Only PDF and DOCX are allowed.' });
         }
-        if (missingSections.includes('projects')) {
-            suggestions.push('Include a "Projects" section to showcase practical applications of your skills.');
+
+        if (!text || text.trim().length === 0) {
+            return res.status(400).json({ success: false, message: 'Failed to extract text from resume. Ensure it is not an image-only file.' });
         }
-        if (foundSkills.length < 5) {
-            suggestions.push('Your resume seems light on technical or soft skills. Try to explicitly list technologies or methodologies you are familiar with.');
+
+        // Check if API key exists
+        if (!process.env.GEMINI_API_KEY) {
+            return res.status(500).json({ success: false, message: 'GEMINI_API_KEY is missing in server environment variables.' });
         }
-        if (wordCount < 200) {
-            suggestions.push('Your resume is quite short. Add more detail to your projects and education to provide a complete picture.');
+
+        // Call Gemini
+        const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+        const prompt = `Analyze this resume and STRICTLY return JSON only in this format:
+{
+"score": number,
+"strengths": string[],
+"weaknesses": string[],
+"missingSkills": string[],
+"suggestions": string[]
+}
+
+Do not include any extra explanation.
+
+Resume:
+${text.substring(0, 15000)}`;
+
+        const result = await model.generateContent(prompt);
+        let rawContent = result.response.text();
+
+        // Clean up response if the model returned markdown blocks despite the instruction
+        rawContent = rawContent.replace(/```json/gi, '').replace(/```/g, '').trim();
+        
+        let analysisJSON;
+        try {
+            analysisJSON = JSON.parse(rawContent);
+        } catch (jsonErr) {
+            console.error('Failed to parse Gemini response JSON:', rawContent);
+            return res.status(500).json({ success: false, message: 'AI returned malformed data.' });
         }
-        if (suggestions.length === 0) {
-            suggestions.push('Great job! Your resume looks solid and well-structured.');
-        }
+
+        // Save Analysis to Student profile
+        student.resumeAnalysis = analysisJSON;
+        await student.save();
 
         res.status(200).json({
             success: true,
-            data: {
-                score,
-                extractedSkills: foundSkills,
-                foundSections,
-                missingSections,
-                suggestions,
-                wordCount
-            }
+            data: analysisJSON,
+            message: 'Analysis complete'
         });
         
     } catch (err) {

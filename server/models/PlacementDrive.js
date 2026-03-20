@@ -4,6 +4,7 @@ const placementDriveSchema = new mongoose.Schema({
   driveName: { type: String, required: true, trim: true },
   companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company', required: true },
   jobRole: { type: String, required: true },
+  jobDescription: { type: String, required: true },
   salary: { type: String, required: true },
   date: { type: Date, required: true },
   batch: { type: String, required: true },
