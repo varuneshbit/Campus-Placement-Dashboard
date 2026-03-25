@@ -4,7 +4,8 @@ const {
     createDrive, 
     updateDrive, 
     applyForDrive,
-    getApplicants
+    getApplicants,
+    deleteDrive
 } = require('../controllers/driveController');
 const { protect, authorize } = require('../middleware/auth');
 
@@ -17,7 +18,8 @@ router.route('/')
     .post(authorize('admin'), createDrive);
 
 router.route('/:id')
-    .put(authorize('admin'), updateDrive);
+    .put(authorize('admin'), updateDrive)
+    .delete(authorize('admin'), deleteDrive);
 
 router.post('/:id/apply', authorize('student'), applyForDrive);
 router.get('/:id/applicants', authorize('admin'), getApplicants);

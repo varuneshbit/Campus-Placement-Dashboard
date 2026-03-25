@@ -1,16 +1,28 @@
 const Event = require('../models/Event');
 const PlacementDrive = require('../models/PlacementDrive');
 const Interview = require('../models/Interview');
+const Student = require('../models/Student');
 
 // @desc    Get all calendar events
 // @route   GET /api/events
 exports.getEvents = async (req, res) => {
     try {
         // 1. Fetch custom events
-        const customEvents = await Event.find();
+        let eventFilter = {};
+        if (req.user.role === 'student') {
+            // Students get drives and interviews specifically filtered from their respective collections.
+            // Hide hardcoded/seeded drive and interview events from the generic Event collection.
+            eventFilter = { type: { $in: ['other', 'result'] } };
+        }
+        const customEvents = await Event.find(eventFilter);
         
         // 2. Fetch drives as events
-        const drives = await PlacementDrive.find().populate('companyId');
+        let driveFilter = {};
+        if (req.user.role === 'student') {
+            driveFilter = { 'applicants.studentId': req.user.id };
+        }
+        
+        const drives = await PlacementDrive.find(driveFilter).populate('companyId');
         const driveEvents = drives.map(drive => ({
             _id: drive._id,
             title: `Drive: ${drive.driveName} (${drive.companyId?.companyName})`,
@@ -24,7 +36,12 @@ exports.getEvents = async (req, res) => {
         // 3. Fetch interviews as events
         let interviewFilter = {};
         if (req.user.role === 'student') {
-            interviewFilter.studentId = req.user.id;
+            const student = await Student.findOne({ user: req.user.id });
+            if (student) {
+                interviewFilter.studentId = student._id;
+            } else {
+                interviewFilter.studentId = null; // Prevent showing others' interviews
+            }
         }
 
         const interviews = await Interview.find(interviewFilter)

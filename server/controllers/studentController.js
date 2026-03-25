@@ -227,27 +227,164 @@ exports.deleteProject = async (req, res) => {
 // @route   GET /api/students
 exports.getStudents = async (req, res) => {
   try {
-    const { branch, batch, search } = req.query;
+    const { branch, batch, search, isRegistered, isBlocked, accountStatus } = req.query;
     
-    // Build query
-    let query = {};
-    if (branch) query.branch = branch;
-    if (batch) query.batch = batch;
+    const filter = { isDeleted: false };
     
-    // Find students matching query
-    let students = await Student.find(query).populate('user', 'name email');
+    if (branch) filter.branch = branch;
+    if (batch) filter.batch = batch;
     
-    // Apply search filter if provided
-    if (search) {
-      const searchRegex = new RegExp(search, 'i');
-      students = students.filter(student => 
-        searchRegex.test(student.rollNumber) || 
-        (student.user && searchRegex.test(student.user.name)) ||
-        (student.user && searchRegex.test(student.user.email))
-      );
+    // Handle accountStatus filter
+    if (accountStatus === 'registered') {
+      filter.isRegistered = true;
+      filter.isBlocked = false;
+    }
+    else if (accountStatus === 'pending') {
+      filter.isRegistered = false;
+      filter.isBlocked = false;
+    }
+    else if (accountStatus === 'blocked') {
+      filter.isBlocked = true;
+      // NOTE: when showing blocked students, keep isDeleted: false so soft-deleted are still hidden
     }
     
-    res.status(200).json({ success: true, count: students.length, data: students });
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { rollNumber: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ];
+    }
+    
+    const page  = parseInt(req.query.page)  || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip  = (page - 1) * limit;
+
+    const [students, total] = await Promise.all([
+      Student.find(filter)
+        .populate('userId', 'email createdAt lastLogin')
+        .sort({ cgpa: -1 })
+        .skip(skip)
+        .limit(limit),
+      Student.countDocuments(filter)
+    ]);
+    
+    res.status(200).json({ 
+      success: true, 
+      students,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+        hasNextPage: page < Math.ceil(total / limit),
+        hasPrevPage: page > 1
+      }
+    });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};
+
+// @desc    Add a single student (Admin)
+// @route   POST /api/students
+exports.addStudent = async (req, res) => {
+  try {
+    const { name, email, rollNumber, branch, batch, cgpa } = req.body;
+    
+    if (!name || !email || !rollNumber || !branch || !batch) {
+      return res.status(400).json({ success: false, message: 'Please provide all required fields' });
+    }
+    
+    const DEFAULT_PASSWORD = 'Student@1234';
+    
+    let user = await User.findOne({ email });
+    if (!user) {
+      user = await User.create({
+        name, email, password: DEFAULT_PASSWORD, role: 'student'
+      });
+    }
+
+    let student = await Student.findOne({ rollNumber });
+    if (student) {
+      return res.status(400).json({ success: false, message: 'Student with this roll number already exists' });
+    }
+
+    student = await Student.create({
+      name, email, rollNumber, branch, batch, cgpa: cgpa || 0,
+      userId: user._id, user: user._id, source: 'manual', isRegistered: true
+    });
+    
+    if (!user.studentId) {
+      user.studentId = student._id;
+      await user.save();
+    }
+    
+    res.status(201).json({ success: true, data: student, message: 'Student added successfully' });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};
+
+// @desc    Add a single student (Admin)
+// @route   POST /api/students
+exports.addStudent = async (req, res) => {
+  try {
+    const { name, email, rollNumber, branch, batch, cgpa } = req.body;
+
+    if (!name || !email || !rollNumber || !branch || !batch || cgpa == null) {
+      return res.status(400).json({ success: false, message: 'Missing required fields' });
+    }
+
+    // Default password for manually added students
+    const DEFAULT_PASSWORD = 'Student@1234';
+
+    // 1. Check if User exists
+    let user = await User.findOne({ email: String(email) });
+    
+    if (!user) {
+      // Create User account if it doesn't exist
+      user = await User.create({
+        name: String(name),
+        email: String(email),
+        password: DEFAULT_PASSWORD,
+        role: 'student'
+      });
+    }
+
+    // 2. Create or Update Student record
+    let student = await Student.findOne({ rollNumber: String(rollNumber) });
+    if (student) {
+      return res.status(400).json({ success: false, message: 'Student with this roll number already exists' });
+    }
+
+    student = await Student.create({
+      name: String(name),
+      email: String(email),
+      rollNumber: String(rollNumber),
+      branch: String(branch),
+      batch: String(batch),
+      cgpa: Number(cgpa),
+      userId: user._id,
+      user: user._id,
+      source: 'manual',
+      isRegistered: true,
+      placementStatus: 'Not Placed',
+      isBlocked: false,
+      isDeleted: false
+    });
+
+    // Save student ID in user if missing
+    if (!user.studentId) {
+      user.studentId = student._id;
+      await user.save();
+    }
+
+    res.status(201).json({
+      success: true,
+      message: 'Student added successfully',
+      student
+    });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
   }
@@ -269,43 +406,72 @@ exports.bulkUploadStudents = async (req, res) => {
     let successCount = 0;
     let errors = [];
     
+    // Default password for bulk uploaded students
+    const DEFAULT_PASSWORD = 'Student@1234';
+    
     for (let i = 0; i < data.length; i++) {
-      const row = data[i];
-      const { Name, Email, RollNumber, Branch, Batch, CGPA } = row;
+        // Headers are case-sensitive usually
+        const row = data[i];
+        
+        // Ensure robust reading order/names based on prompt expectation
+        const keys = Object.keys(row);
+        const rollNumber = row[keys[0]] || row['RollNumber'];
+        const email = row[keys[1]] || row['Email'];
+        const name = row[keys[2]] || row['Name'];
+        const branch = row[keys[3]] || row['Branch'];
+        const batch = row[keys[4]] || row['Batch'];
+        const cgpa = row[keys[5]] || row['CGPA'];
       
       // Validation
-      if (!Name || !Email || !RollNumber || !Branch || !Batch || CGPA == null) {
-        errors.push(`Row ${i + 2}: Missing required fields (Name, Email, RollNumber, Branch, Batch, CGPA)`);
+      if (!name || !email || !rollNumber || !branch || !batch || cgpa == null) {
+        errors.push(`Row ${i + 2}: Missing required fields`);
         continue;
       }
       
       try {
-        // Check if user exists
-        let user = await User.findOne({ email: Email });
+        // 1. First, check if User exists
+        let user = await User.findOne({ email: String(email) });
+        
         if (!user) {
+          // Create User account if it doesn't exist
           user = await User.create({
-            name: Name,
-            email: Email,
-            password: 'Student@123', // Default password
-            role: 'student'
+            name: String(name),
+            email: String(email),
+            password: DEFAULT_PASSWORD,
+            role: 'student' // Assign role correctly
           });
         }
+
+        // 2. Create or Update Student record
+        const student = await Student.findOneAndUpdate(
+          { rollNumber: String(rollNumber) },
+          {
+            $set: {
+              name: String(name),
+              branch: String(branch),
+              batch: String(batch),
+              cgpa: Number(cgpa),
+              userId: user._id, 
+              user: user._id
+            },
+            $setOnInsert: {
+              email: String(email),
+              source: 'excel',
+              isRegistered: true, // We consider them registered since they have an account
+              placementStatus: 'Not Placed',
+              isBlocked: false,
+              isDeleted: false
+            }
+          },
+          { upsert: true, new: true, runValidators: true }
+        );
         
-        // Check if student exists
-        let student = await Student.findOne({ rollNumber: RollNumber });
-        if (student) {
-          errors.push(`Row ${i + 2}: RollNumber ${RollNumber} already exists`);
-          continue;
+        // Save student ID in user if missing
+        if (!user.studentId) {
+            user.studentId = student._id;
+            await user.save();
         }
-        
-        await Student.create({
-          user: user._id,
-          rollNumber: String(RollNumber),
-          branch: String(Branch),
-          batch: String(Batch),
-          cgpa: Number(CGPA)
-        });
-        
+
         successCount++;
       } catch (err) {
         errors.push(`Row ${i + 2}: ${err.message}`);
@@ -326,11 +492,35 @@ exports.bulkUploadStudents = async (req, res) => {
 // @route   GET /api/students/export
 exports.exportStudents = async (req, res) => {
   try {
-    const students = await Student.find().populate('user', 'name email');
+    const { branch, batch, search, accountStatus } = req.query;
+    const filter = { isDeleted: false };
+    
+    if (branch) filter.branch = branch;
+    if (batch) filter.batch = batch;
+    
+    if (accountStatus === 'registered') {
+      filter.isRegistered = true;
+      filter.isBlocked = false;
+    } else if (accountStatus === 'pending') {
+      filter.isRegistered = false;
+      filter.isBlocked = false;
+    } else if (accountStatus === 'blocked') {
+      filter.isBlocked = true;
+    }
+    
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { rollNumber: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const students = await Student.find(filter).populate('userId user', 'email name');
     
     const data = students.map(student => ({
-      Name: student.user ? student.user.name : 'N/A',
-      Email: student.user ? student.user.email : 'N/A',
+      Name: student.name || (student.user && student.user.name) || (student.userId && student.userId.name) || 'N/A',
+      Email: student.email || (student.user && student.user.email) || (student.userId && student.userId.email) || 'N/A',
       RollNumber: student.rollNumber,
       Branch: student.branch,
       Batch: student.batch,
@@ -407,5 +597,52 @@ exports.deleteStudent = async (req, res) => {
     res.status(200).json({ success: true, message: 'Student deleted successfully' });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
+  }
+};
+
+// @desc    Get eligible students for drive
+// @route   GET /api/students/eligible
+exports.getEligibleStudents = async (req, res) => {
+  try {
+    const { minCGPA, branches } = req.query;
+
+    const filter = {
+      isDeleted: false,
+      isBlocked: false
+    };
+
+    // Only apply CGPA filter if minCGPA is a valid number greater than 0
+    if (minCGPA && !isNaN(parseFloat(minCGPA)) && parseFloat(minCGPA) > 0) {
+      filter.cgpa = { $gte: parseFloat(minCGPA) };
+    }
+
+    // Only apply branch filter if branches param is not empty
+    if (branches && branches.trim() !== '') {
+      const branchList = branches.split(',').map(b => b.trim()).filter(Boolean);
+      if (branchList.length > 0) {
+        filter.branch = { $in: branchList };
+      }
+    }
+
+    console.log('Eligible students filter:', filter); // debug log
+
+    const students = await Student.find(filter)
+      .select('name email rollNumber branch batch cgpa profileImageURL isRegistered')
+      .sort({ cgpa: -1 })
+      .limit(500);
+
+    console.log('Eligible students found:', students.length); // debug log
+
+    // Some frontend components expect photoURL, your schema uses profileImageURL
+    const mappedStudents = students.map(s => {
+       const obj = s.toObject();
+       obj.photoURL = obj.profileImageURL;
+       return obj;
+    });
+
+    res.json({ success: true, students: mappedStudents, total: students.length });
+  } catch (err) {
+    console.error('getEligibleStudents error:', err);
+    res.status(500).json({ message: err.message });
   }
 };

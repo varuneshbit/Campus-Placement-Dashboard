@@ -1,11 +1,12 @@
 const User = require('../models/User');
+const Student = require('../models/Student');
 const jwt = require('jsonwebtoken');
 
 // @desc    Register user
 // @route   POST /api/auth/register
 exports.register = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, branch, batch, cgpa, rollNumber } = req.body;
 
     const user = await User.create({
       name,
@@ -13,6 +14,37 @@ exports.register = async (req, res) => {
       password,
       role
     });
+
+    if (role === 'student') {
+        const matchQuery = rollNumber
+            ? { $or: [{ rollNumber }, { email }] }
+            : { email };
+
+        const student = await Student.findOneAndUpdate(
+            matchQuery,
+            {
+                $set: {
+                    userId: user._id,
+                    user: user._id,
+                    isRegistered: true,
+                    name,
+                    email,
+                    ...(branch && { branch }),
+                    ...(batch && { batch }),
+                    ...(cgpa && { cgpa }),
+                    ...(rollNumber && { rollNumber })
+                },
+                $setOnInsert: {
+                    source: 'self-register',
+                    placementStatus: 'Not Placed',
+                    isBlocked: false,
+                    isDeleted: false
+                }
+            },
+            { upsert: true, new: true, runValidators: true }
+        );
+        user.studentId = student._id;
+    }
 
     sendTokenResponse(user, 201, res);
   } catch (err) {
@@ -48,6 +80,11 @@ exports.login = async (req, res) => {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
 
+    if (user.role === 'student') {
+        const student = await Student.findOne({ email: user.email });
+        if (student) user.studentId = student._id;
+    }
+
     sendTokenResponse(user, 200, res);
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
@@ -63,8 +100,18 @@ exports.getMe = async (req, res) => {
 
 // Get token from model, create cookie and send response
 const sendTokenResponse = (user, statusCode, res) => {
-  // Create token
-  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+  // Create token payload containing user id and potentially studentId
+  const payload = { 
+      id: user._id, 
+      userId: user._id, 
+      role: user.role 
+  };
+  
+  if (user.studentId) {
+      payload.studentId = user.studentId;
+  }
+
+  const token = jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRE || '30d'
   });
 
@@ -75,7 +122,8 @@ const sendTokenResponse = (user, statusCode, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.role,
+        ...(user.studentId && { studentId: user.studentId })
     }
   });
 };

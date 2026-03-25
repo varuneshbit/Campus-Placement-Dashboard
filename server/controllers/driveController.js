@@ -49,25 +49,27 @@ exports.updateDrive = async (req, res) => {
     const wasClosed = drive.registrationStatus !== 'open';
     
     drive = await PlacementDrive.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true
+      new: true
     });
 
     // Notify students if registration opened
     if (wasClosed && req.body.registrationStatus === 'open') {
        const students = await User.find({ role: 'student' });
-       const notifications = students.map(student => ({
-         user: student._id,
-         title: 'Registration Opened',
-         message: `Registration is now OPEN for ${drive.driveName}. Apply before the deadline!`,
-         type: 'drive',
-         link: '/student/dashboard'
-       }));
-       await Notification.insertMany(notifications);
+       if (students && students.length > 0) {
+           const notifications = students.map(student => ({
+             user: student._id,
+             title: 'Registration Opened',
+             message: `Registration is now OPEN for ${drive.driveName}. Apply before the deadline!`,
+             type: 'drive',
+             link: '/student/dashboard'
+           }));
+           await Notification.insertMany(notifications);
+       }
     }
 
     res.status(200).json({ success: true, data: drive });
   } catch (err) {
+    console.error('Update Drive Error:', err);
     res.status(400).json({ success: false, message: err.message });
   }
 };
@@ -76,6 +78,14 @@ exports.updateDrive = async (req, res) => {
 // @route   POST /api/drives/:id/apply
 exports.applyForDrive = async (req, res) => {
   try {
+    const studentInfo = await require('../models/Student').findOne({ user: req.user.id });
+    if (studentInfo?.isBlocked) {
+      return res.status(403).json({
+        success: false, 
+        message: 'Your account has been blocked. You cannot apply to placement drives. Please contact the placement cell.'
+      });
+    }
+
     const drive = await PlacementDrive.findById(req.params.id);
     if (!drive) {
       return res.status(404).json({ success: false, message: 'Drive not found' });
@@ -132,3 +142,19 @@ exports.getApplicants = async (req, res) => {
       res.status(400).json({ success: false, message: err.message });
     }
   };
+
+// @desc    Delete placement drive
+// @route   DELETE /api/drives/:id
+exports.deleteDrive = async (req, res) => {
+  try {
+    const drive = await PlacementDrive.findById(req.params.id);
+    if (!drive) {
+      return res.status(404).json({ success: false, message: 'Drive not found' });
+    }
+    
+    await PlacementDrive.findByIdAndDelete(req.params.id);
+    res.status(200).json({ success: true, data: {} });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};

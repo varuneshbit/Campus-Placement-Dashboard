@@ -4,16 +4,35 @@
   --color-primary: #4f46e5;
   --color-primary-dark: #4338ca;
   --color-accent: #8b5cf6;
-  --color-bg: #f8fafc;
-  --color-surface: #ffffff;
-  --color-text-main: #0f172a;
-  --color-text-muted: #64748b;
-  --color-border: #f1f5f9;
+  
+  /* Dynamic Variables mapped to Tailwind native colors! */
+  --color-white: var(--color-surface);
+  --color-slate-50: var(--color-bg);
+  --color-slate-100: var(--color-bg-alt);
+  --color-slate-200: var(--color-border);
+  --color-slate-300: var(--color-border-hover);
+  --color-slate-400: var(--color-text-muted-light);
+  --color-slate-500: var(--color-text-muted);
+  --color-slate-600: var(--color-text-main-light);
+  --color-slate-800: var(--color-surface-hover);
+  --color-slate-900: var(--color-text-main);
 }
 
 :root {
   --primary: 255 65% 60%;
   --secondary: 180 70% 45%;
+
+  /* Color System */
+  --color-surface: #ffffff;
+  --color-surface-hover: #1e293b;
+  --color-bg: #f8fafc;
+  --color-bg-alt: #f1f5f9;
+  --color-border: #e2e8f0;
+  --color-border-hover: #cbd5e1;
+  --color-text-main: #0f172a;
+  --color-text-main-light: #475569;
+  --color-text-muted: #64748b;
+  --color-text-muted-light: #94a3b8;
 
   /* UI Variables */
   --radius-sm: 0.5rem;
@@ -24,6 +43,24 @@
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
   --shadow-premium: rgba(149, 157, 165, 0.2) 0px 8px 24px;
   --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dark {
+  --color-surface: #0f172a;      /* Deep slate surface */
+  --color-surface-hover: #1e293b;
+  --color-bg: #020617;           /* Almost black background */
+  --color-bg-alt: #0f172a;
+  --color-border: #1e293b;
+  --color-border-hover: #334155;
+  --color-text-main: #f8fafc;    /* Off-white text */
+  --color-text-main-light: #cbd5e1;
+  --color-text-muted: #94a3b8;
+  --color-text-muted-light: #64748b;
+  
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.5);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.5);
+  --shadow-premium: rgba(0, 0, 0, 0.4) 0px 8px 24px;
 }
 
 body {
@@ -358,3 +395,14 @@ body {
   background-color: rgba(79, 70, 229, 0.05);
   box-shadow: inset 0 0 0 1px rgba(79, 70, 229, 0.4);
 }
+
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+

@@ -12,7 +12,8 @@ import {
   Building2,
   Users2,
   Download,
-  DollarSign
+  DollarSign,
+  Trash2
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -119,7 +120,21 @@ const AdminDrives = () => {
       );
       fetchDrives();
     } catch (err) {
-      alert('Failed to update status');
+      alert(err.response?.data?.message || err.message || 'Failed to update status');
+    }
+  };
+
+  const handleDeleteDrive = async (driveId) => {
+    if (window.confirm('Are you sure you want to delete this placement drive?')) {
+      try {
+        const token = localStorage.getItem('token');
+        await axios.delete(`http://localhost:5000/api/drives/${driveId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        fetchDrives();
+      } catch (err) {
+        alert(err.response?.data?.message || err.message || 'Failed to delete drive');
+      }
     }
   };
 
@@ -157,11 +172,20 @@ const AdminDrives = () => {
                     </p>
                   </div>
                 </div>
-                <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${
-                  drive.registrationStatus === 'open' ? 'bg-emerald-100 text-emerald-700' : 
-                  drive.registrationStatus === 'closed' ? 'bg-rose-100 text-rose-700' : 'bg-blue-100 text-blue-700'
-                }`}>
-                  {drive.registrationStatus}
+                <div className="flex items-center gap-3">
+                  <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${
+                    drive.registrationStatus === 'open' ? 'bg-emerald-100 text-emerald-700' : 
+                    drive.registrationStatus === 'closed' ? 'bg-rose-100 text-rose-700' : 'bg-blue-100 text-blue-700'
+                  }`}>
+                    {drive.registrationStatus}
+                  </div>
+                  <button 
+                    onClick={() => handleDeleteDrive(drive._id)}
+                    className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                    title="Delete Drive"
+                  >
+                    <Trash2 size={18} />
+                  </button>
                 </div>
               </div>
 

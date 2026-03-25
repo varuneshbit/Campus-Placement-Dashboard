@@ -6,80 +6,57 @@ const User = require('../models/User');
 // @route   GET /api/leaderboard
 exports.getLeaderboard = async (req, res) => {
     try {
-        // 1. Highest CGPA
-        const topCGPA = await Student.find()
-            .populate('user', 'name email')
-            .sort({ cgpa: -1 })
-            .limit(10);
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const type = req.query.type || 'academic';
+        const batch = req.query.batch;
+        const branch = req.query.branch;
+        const skip = (page - 1) * limit;
 
-        // 2. Most Interviews Cleared
-        const topInterviews = await Interview.aggregate([
-            { $match: { result: 'selected' } },
-            { $group: { _id: '$studentId', count: { $sum: 1 } } },
-            { $sort: { count: -1 } },
-            { $limit: 10 },
-            {
-                $lookup: {
-                    from: 'users',
-                    localField: '_id',
-                    foreignField: '_id',
-                    as: 'student'
-                }
-            },
-            { $unwind: '$student' },
-            {
-                $lookup: {
-                    from: 'students',
-                    localField: '_id',
-                    foreignField: 'user',
-                    as: 'profile'
-                }
-            },
-            { $unwind: '$profile' }
-        ]);
+        let students = [];
+        let total = 0;
 
-        // 3. Top Placed (Highest Salary)
-        const selections = await Interview.find({ result: 'selected' })
-            .populate('driveId')
-            .populate('studentId', 'name email')
-            .limit(100);
+        let baseFilter = { isDeleted: false };
+        if (batch) baseFilter.batch = batch;
+        if (branch) baseFilter.branch = branch;
 
-        const topPlacedList = [];
-        for (let s of selections) {
-            if (!s.driveId || !s.studentId) continue;
-            
-            // Fetch student profile to get the branch
-            const profile = await Student.findOne({ user: s.studentId._id });
-            
-            let salaryValue = 0;
-            if (s.driveId.salary) {
-                // Try to extract number using regex e.g. "12 LPA", "10.5", "10-12 LPA" -> 12
-                const match = s.driveId.salary.match(/(\d+(\.\d+)?)/g);
-                if (match && match.length > 0) {
-                    // If range like 10-12, take the higher one
-                    salaryValue = Math.max(...match.map(n => parseFloat(n)));
-                }
-            }
-
-            topPlacedList.push({
-                student: s.studentId,
-                profile: profile,
-                company: s.driveId.driveName,
-                salary: s.driveId.salary,
-                salaryValue: salaryValue
-            });
+        if (type === 'academic') {
+            const filter = { ...baseFilter, cgpa: { $gt: 0 } };
+            const [data, count] = await Promise.all([
+                Student.find(filter)
+                  .select('name rollNumber branch batch cgpa profileImageURL placementStatus email phone skills')
+                  .sort({ cgpa: -1 })
+                  .skip(skip)
+                  .limit(limit),
+                Student.countDocuments(filter)
+            ]);
+            students = data;
+            total = count;
+        } else {
+            const filter = { ...baseFilter, placementStatus: 'Placed' };
+            const [data, count] = await Promise.all([
+                Student.find(filter)
+                  .select('name rollNumber branch batch cgpa profileImageURL placementStatus email phone skills updatedAt')
+                  .sort({ updatedAt: -1 })
+                  .skip(skip)
+                  .limit(limit),
+                Student.countDocuments(filter)
+            ]);
+            students = data;
+            total = count;
         }
 
-        const topPlaced = topPlacedList
-            .sort((a, b) => b.salaryValue - a.salaryValue)
-            .slice(0, 10);
-
-        res.status(200).json({
+        res.json({
             success: true,
-            data: {
-                topCGPA,
-                topInterviews,
-                topPlaced
+            data: students,
+            students,
+            pagination: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit),
+                hasNextPage: page < Math.ceil(total / limit),
+                hasPrevPage: page > 1
             }
         });
     } catch (err) {

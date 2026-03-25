@@ -1,20 +1,22 @@
 const express = require('express');
-const { 
-  uploadResume, 
-  getStudentProfile, 
-  updateProfile, 
+const {
+  uploadResume,
+  getStudentProfile,
+  updateProfile,
   uploadImage,
   getProjects,
   addProject,
   updateProject,
   deleteProject,
   getStudents,
+  addStudent,
   bulkUploadStudents,
   exportStudents,
   blockStudent,
   unblockStudent,
   updatePlacementStatus,
-  deleteStudent
+  deleteStudent,
+  getEligibleStudents
 } = require('../controllers/studentController');
 const { protect, authorize } = require('../middleware/auth');
 const { uploadResume: uploadResumeMiddleware, uploadImage: uploadImageMiddleware, uploadExcel } = require('../middleware/upload');
@@ -36,6 +38,8 @@ router.delete('/profile/projects/:id', authorize('student'), deleteProject);
 
 // Admin routes
 router.get('/', authorize('admin'), getStudents);
+router.post('/', authorize('admin'), addStudent);
+router.get('/eligible', authorize('admin'), getEligibleStudents);
 router.post('/bulk-upload', authorize('admin'), uploadExcel, bulkUploadStudents);
 router.get('/export', authorize('admin'), exportStudents);
 router.put('/:id/block', authorize('admin'), blockStudent);

@@ -8,12 +8,17 @@ const interviewSchema = new mongoose.Schema({
   },
   studentId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'Student',
     required: true
   },
   round: {
     type: String,
     required: true
+  },
+  mode: {
+    type: String,
+    enum: ['Online', 'Offline', 'Hybrid'],
+    default: 'Online'
   },
   interviewDate: {
     type: Date,
@@ -24,13 +29,16 @@ const interviewSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['scheduled', 'completed', 'cancelled', 'deferred'],
+    enum: ['scheduled', 'completed', 'cancelled', 'deferred', 'no show'],
     default: 'scheduled'
   },
   result: {
     type: String,
-    enum: ['pending', 'selected', 'rejected'],
+    enum: ['pending', 'selected', 'rejected', 'on hold'],
     default: 'pending'
+  },
+  feedback: {
+    type: String
   }
 }, { timestamps: true });
 

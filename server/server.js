@@ -43,6 +43,7 @@ app.use('/api/events', require('./routes/events'));
 app.use('/api/leaderboard', require('./routes/leaderboard'));
 app.use('/api/reports', require('./routes/reports'));
 app.use('/api/resume', require('./routes/resume'));
+app.use('/api/analytics', require('./routes/analytics'));
 
 const PORT = process.env.PORT || 5000;
 

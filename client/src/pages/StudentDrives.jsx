@@ -7,7 +7,9 @@ import {
   DollarSign, 
   Zap,
   ClipboardList,
-  Building2
+  Building2,
+  X,
+  Info
 } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
@@ -18,6 +20,8 @@ const StudentDrives = () => {
   const [drives, setDrives] = useState([]);
   const [interviews, setInterviews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedDrive, setSelectedDrive] = useState(null);
+  const [showModal, setShowModal] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -124,31 +128,109 @@ const StudentDrives = () => {
                      </div>
                   </div>
 
-                  <button 
-                    disabled={isApplied || drive.registrationStatus !== 'open'}
-                    onClick={() => handleApply(drive._id)}
-                    className={`w-full py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 ${
-                      isApplied 
-                        ? 'bg-emerald-50 text-emerald-600 cursor-default' 
-                        : drive.registrationStatus === 'open'
-                        ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-600/20 hover:-translate-y-1'
-                        : 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                    }`}
-                  >
-                    {isApplied ? (
-                      <><CheckCircle size={20} /> Applied Successfully</>
-                    ) : drive.registrationStatus === 'open' ? (
-                      <><Zap size={20} /> Apply Now</>
-                    ) : (
-                      'Registration Closed'
-                    )}
-                  </button>
+                  <div className="flex gap-3 mt-4">
+                    <button 
+                      onClick={() => {
+                        setSelectedDrive(drive);
+                        setShowModal(true);
+                      }}
+                      className="flex-1 py-4 rounded-2xl font-bold transition-all bg-slate-100 text-slate-700 hover:bg-slate-200 flex items-center justify-center gap-2"
+                    >
+                      <Info size={18} /> Details
+                    </button>
+                    <button 
+                      disabled={isApplied || drive.registrationStatus !== 'open'}
+                      onClick={() => handleApply(drive._id)}
+                      className={`flex-[1.5] py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 ${
+                        isApplied 
+                          ? 'bg-emerald-50 text-emerald-600 cursor-default border border-emerald-100' 
+                          : drive.registrationStatus === 'open'
+                          ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-600/20 hover:-translate-y-1'
+                          : 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
+                      }`}
+                    >
+                      {isApplied ? (
+                        <><CheckCircle size={18} /> Applied</>
+                      ) : drive.registrationStatus === 'open' ? (
+                        <><Zap size={18} /> Apply Now</>
+                      ) : (
+                        'Closed'
+                      )}
+                    </button>
+                  </div>
                 </div>
               );
             })}
           </div>
         </div>
       </div>
+
+      {/* Drive Details Modal */}
+      {showModal && selectedDrive && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden relative z-[61]">
+            <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+              <div>
+                 <h3 className="text-2xl font-bold text-slate-900 font-display">{selectedDrive.driveName}</h3>
+                 <p className="text-indigo-600 font-semibold flex items-center gap-1.5 mt-1"><Building2 size={16}/> {selectedDrive.companyId?.companyName}</p>
+              </div>
+              <button onClick={() => setShowModal(false)} className="p-2 text-slate-400 hover:bg-white hover:text-slate-900 rounded-xl transition-all shadow-sm">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-8 space-y-6 overflow-y-auto max-h-[60vh]">
+               <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 col-span-2 md:col-span-1">
+                     <p className="text-sm font-semibold text-slate-500 mb-1 flex items-center gap-1.5"><Briefcase size={16}/> Job Role</p>
+                     <p className="font-bold text-slate-900">{selectedDrive.jobRole || 'Not Specified'}</p>
+                  </div>
+                  <div className="bg-emerald-50 p-4 rounded-2xl border border-emerald-100 col-span-2 md:col-span-1">
+                     <p className="text-sm font-semibold text-emerald-600 mb-1 flex items-center gap-1.5"><DollarSign size={16}/> Salary Package</p>
+                     <p className="font-bold text-emerald-700">{selectedDrive.salary}</p>
+                  </div>
+                  <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 col-span-2 md:col-span-1 flex items-center justify-between">
+                     <div>
+                       <p className="text-sm font-semibold text-slate-500 mb-1 flex items-center gap-1.5"><Calendar size={16}/> Drive Date</p>
+                       <p className="font-bold text-slate-900">{new Date(selectedDrive.date).toLocaleDateString()}</p>
+                     </div>
+                  </div>
+                  <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 col-span-2 md:col-span-1 flex items-center justify-between">
+                     <div>
+                       <p className="text-sm font-semibold text-slate-500 mb-1 flex items-center gap-1.5"><CheckCircle size={16}/> Eligibility</p>
+                       <p className="font-bold text-slate-900">{selectedDrive.eligibility?.minCGPA}+ CGPA | Batch: {selectedDrive.batch}</p>
+                     </div>
+                  </div>
+               </div>
+
+               <div>
+                 <h4 className="font-bold text-slate-900 mb-3 flex items-center gap-2"><ClipboardList size={18} className="text-indigo-500"/> Job Description</h4>
+                 <div className="p-5 bg-slate-50 rounded-2xl text-slate-700 leading-relaxed text-sm whitespace-pre-wrap border border-slate-100">
+                    {selectedDrive.jobDescription || 'No description provided.'}
+                 </div>
+               </div>
+            </div>
+            <div className="px-8 py-5 border-t border-slate-100 bg-slate-50 flex flex-col md:flex-row items-center justify-end gap-3">
+               <button onClick={() => setShowModal(false)} className="w-full md:w-auto px-6 py-3 rounded-xl border border-slate-200 text-slate-700 font-semibold hover:bg-white hover:text-slate-900 transition-all">Close Details</button>
+               {!selectedDrive.applicants.some(a => a.studentId === user.id) && selectedDrive.registrationStatus === 'open' && (
+                  <button 
+                    onClick={() => {
+                        handleApply(selectedDrive._id); 
+                        setShowModal(false);
+                    }} 
+                    className="w-full md:w-auto px-6 py-3 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-600/20 transition-all flex items-center justify-center gap-2"
+                  >
+                     <Zap size={18}/> Apply Now
+                  </button>
+               )}
+               {selectedDrive.applicants.some(a => a.studentId === user.id) && (
+                  <button disabled className="w-full md:w-auto px-6 py-3 rounded-xl bg-emerald-50 text-emerald-600 font-bold border border-emerald-200 flex items-center justify-center gap-2 cursor-default">
+                     <CheckCircle size={18}/> Applied Successfully
+                  </button>
+               )}
+            </div>
+          </div>
+        </div>
+      )}
     </StudentLayout>
   );
 };

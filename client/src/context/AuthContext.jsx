@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
 
   const loadUser = async (token) => {
     try {
-      const res = await axios.get('/api/auth/profile', {
+      const res = await axios.get('http://localhost:5000/api/auth/profile', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUser(res.data.data);
@@ -32,9 +32,26 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const register = async (userData) => {
+    try {
+      const res = await axios.post('http://localhost:5000/api/auth/register', userData);
+      const { token, user: newUserData } = res.data;
+      localStorage.setItem('token', token);
+      setUser(newUserData);
+      
+      // Redirect based on role
+      if (newUserData.role === 'admin') navigate('/admin/dashboard');
+      else navigate('/student/dashboard');
+      
+      return { success: true };
+    } catch (err) {
+      return { success: false, message: err.response?.data?.message || 'Registration failed' };
+    }
+  };
+
   const login = async (email, password) => {
     try {
-      const res = await axios.post('/api/auth/login', { email, password });
+      const res = await axios.post('http://localhost:5000/api/auth/login', { email, password });
       const { token, user: userData } = res.data;
       localStorage.setItem('token', token);
       setUser(userData);
@@ -56,7 +73,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,6 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import Login from './pages/Login';
 import AdminDashboard from './pages/AdminDashboard';
 import Companies from './pages/Companies';
@@ -21,7 +23,9 @@ import StudentResume from './pages/StudentResume';
 function App() {
   return (
     <Router>
-      <AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <Toaster position="top-right" />
         <Routes>
           <Route path="/login" element={<Login />} />
           
@@ -171,7 +175,8 @@ function App() {
 
           <Route path="/" element={<Navigate to="/login" />} />
         </Routes>
-      </AuthProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </Router>
   );
 }

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Bell, Search, Check, Clock, Mail, ChevronDown, User, LogOut } from 'lucide-react';
+import { Link as RouterLink } from 'react-router-dom';
+import { Bell, Search, Check, Clock, Mail, ChevronDown, User, LogOut, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import axios from 'axios';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -68,6 +70,15 @@ const Navbar = () => {
 
       <div className="flex items-center bg-white rounded-full px-2 py-1.5 shadow-sm border border-slate-200">
         
+        {/* Theme Toggle Button */}
+        <button 
+          onClick={toggleTheme}
+          className="p-2 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all mr-1"
+          title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+        >
+          {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+        </button>
+
         {/* Bell Icon with existing Notifications Logic */}
         <div className="relative">
           <button 
@@ -161,13 +172,13 @@ const Navbar = () => {
               <p className="text-xs text-slate-500 truncate capitalize">{user?.role || 'Administrator'}</p>
             </div>
             <div className="p-2">
-              <Link 
+              <RouterLink 
                 to={user?.role === 'admin' ? "/admin/dashboard" : "/student/profile"}
                 className="flex items-center gap-2 px-3 py-2 text-sm text-slate-600 hover:text-primary hover:bg-slate-50 rounded-lg transition-colors"
               >
                 <User size={16} />
                 <span>My Profile</span>
-              </Link>
+              </RouterLink>
             </div>
           </div>
         </div>

@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import toast, { Toaster } from 'react-hot-toast';
 import AdminLayout from '../components/AdminLayout';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
@@ -17,34 +19,65 @@ import {
 } from 'lucide-react';
 
 const Analytics = () => {
-    // Mock Data
-    const placementData = [
-        { name: '2021', placed: 450, total: 500 },
-        { name: '2022', placed: 520, total: 600 },
-        { name: '2023', placed: 610, total: 700 },
-        { name: '2024', placed: 842, total: 950 },
-    ];
+    const [loading, setLoading] = useState(true);
+    const [analyticsData, setAnalyticsData] = useState({
+        placementRatio: '0%',
+        avgCTC: '0 LPA',
+        totalCompanies: 0,
+        totalOffers: 0,
+        placementData: [],
+        industryData: [],
+        driveTrends: []
+    });
 
-    const industryData = [
-      { name: 'IT/Software', value: 400 },
-      { name: 'Finance', value: 300 },
-      { name: 'E-commerce', value: 300 },
-      { name: 'Core Eng.', value: 200 },
-    ];
+    const COLORS = ['#6366f1', '#a855f7', '#ec4899', '#f43f5e', '#10b981', '#f59e0b', '#3b82f6'];
 
-    const COLORS = ['#6366f1', '#a855f7', '#ec4899', '#f43f5e'];
+    useEffect(() => {
+        const fetchAnalytics = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await axios.get('http://localhost:5000/api/analytics', {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (res.data.success) {
+                    setAnalyticsData(res.data.data);
+                }
+            } catch (err) {
+                console.error('Failed to fetch analytics', err);
+                toast.error('Failed to load analytics data');
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchAnalytics();
+    }, []);
 
-    const driveTrends = [
-        { name: 'Jan', count: 12 },
-        { name: 'Feb', count: 18 },
-        { name: 'Mar', count: 15 },
-        { name: 'Apr', count: 25 },
-        { name: 'May', count: 32 },
-        { name: 'Jun', count: 28 },
-    ];
+    const handleExport = async () => {
+        const toastId = toast.loading('Generating report...');
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.get('http://localhost:5000/api/reports/students?format=excel', {
+                headers: { Authorization: `Bearer ${token}` },
+                responseType: 'blob'
+            });
+
+            const url = window.URL.createObjectURL(new Blob([res.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `Student_Placement_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode.removeChild(link);
+
+            toast.success('Report generated successfully!', { id: toastId });
+        } catch (err) {
+            toast.error('Failed to generate report', { id: toastId });
+        }
+    };
 
     return (
         <AdminLayout>
+            <Toaster position="top-right" />
             <div className="space-y-8">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
@@ -56,7 +89,7 @@ const Analytics = () => {
                             <button className="px-4 py-2 text-sm font-bold bg-primary text-white rounded-lg">Real-time</button>
                             <button className="px-4 py-2 text-sm font-bold text-slate-500 hover:text-slate-900">Historical</button>
                         </div>
-                        <button className="flex items-center gap-2 bg-slate-900 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-slate-800 transition-all">
+                        <button onClick={handleExport} className="flex items-center gap-2 bg-slate-900 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-slate-800 transition-all">
                             <Download size={18} /> Generate Report
                         </button>
                     </div>
@@ -65,19 +98,16 @@ const Analytics = () => {
                 {/* Performance Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {[
-                        { title: 'Placement Ratio', value: '88.6%', change: '+4.2%', icon: <Award className="text-emerald-600" />, bg: 'bg-emerald-50', trend: 'up' },
-                        { title: 'Avg. CTC', value: '8.4 LPA', change: '+1.2L', icon: <TrendingUp className="text-primary" />, bg: 'bg-indigo-50', trend: 'up' },
-                        { title: 'Total Companies', value: '248', change: '+18', icon: <Briefcase className="text-purple-600" />, bg: 'bg-purple-50', trend: 'up' },
-                        { title: 'Total Offers', value: '1,420', change: '-2%', icon: <Users className="text-pink-600" />, bg: 'bg-pink-50', trend: 'down' },
+                        { title: 'Placement Ratio', value: analyticsData.placementRatio, icon: <Award className="text-emerald-600" />, bg: 'bg-emerald-50' },
+                        { title: 'Avg. CTC', value: analyticsData.avgCTC, icon: <TrendingUp className="text-primary" />, bg: 'bg-indigo-50' },
+                        { title: 'Total Companies', value: analyticsData.totalCompanies, icon: <Briefcase className="text-purple-600" />, bg: 'bg-purple-50' },
+                        { title: 'Total Offers', value: analyticsData.totalOffers, icon: <Users className="text-pink-600" />, bg: 'bg-pink-50' },
                     ].map((stat, idx) => (
                         <div key={idx} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm group hover:shadow-xl transition-all">
                             <div className="flex justify-between items-start mb-4">
                                 <div className={`w-12 h-12 ${stat.bg} rounded-2xl flex items-center justify-center`}>
                                     {stat.icon}
                                 </div>
-                                <span className={`flex items-center gap-1 text-xs font-bold ${stat.trend === 'up' ? 'text-emerald-600' : 'text-rose-600'}`}>
-                                    {stat.trend === 'up' ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />} {stat.change}
-                                </span>
                             </div>
                             <p className="text-sm font-medium text-slate-500">{stat.title}</p>
                             <h4 className="text-2xl font-bold text-slate-900 mt-1">{stat.value}</h4>
@@ -96,7 +126,7 @@ const Analytics = () => {
                         </div>
                         <div className="h-[350px] w-full">
                             <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={placementData}>
+                                <BarChart data={analyticsData.placementData}>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
                                     <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
@@ -122,7 +152,7 @@ const Analytics = () => {
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
                                     <Pie
-                                        data={industryData}
+                                        data={analyticsData.industryData}
                                         cx="50%"
                                         cy="50%"
                                         innerRadius={80}
@@ -130,7 +160,7 @@ const Analytics = () => {
                                         paddingAngle={5}
                                         dataKey="value"
                                     >
-                                        {industryData.map((entry, index) => (
+                                        {analyticsData.industryData.map((entry, index) => (
                                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                         ))}
                                     </Pie>
@@ -150,7 +180,7 @@ const Analytics = () => {
                         </div>
                         <div className="h-[300px] w-full">
                             <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={driveTrends}>
+                                <AreaChart data={analyticsData.driveTrends}>
                                     <defs>
                                         <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
                                             <stop offset="5%" stopColor="#6366f1" stopOpacity={0.1}/>

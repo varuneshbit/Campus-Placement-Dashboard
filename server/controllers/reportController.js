@@ -97,7 +97,7 @@ const sendPDF = (res, filename, title, columns, data) => {
 exports.exportStudentReport = async (req, res) => {
     try {
         const { format = 'csv' } = req.query;
-        const students = await Student.find().populate('user', 'name email').lean();
+        const students = await Student.find({ isDeleted: false }).populate('userId', 'name email').lean();
         
         // Fetch placement details
         const selections = await Interview.find({ result: 'selected' })
