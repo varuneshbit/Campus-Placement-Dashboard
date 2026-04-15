@@ -49,17 +49,26 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = async (email, password) => {
+  const login = async (email, password, expectedRole) => {
     try {
       const res = await axios.post('http://localhost:5000/api/auth/login', { email, password });
       const { token, user: userData } = res.data;
+
+      // Block login if the selected role doesn't match the account's actual role
+      if (expectedRole && userData.role !== expectedRole) {
+        return {
+          success: false,
+          message: `This account is not a ${expectedRole} account. Please select the correct role.`,
+        };
+      }
+
       localStorage.setItem('token', token);
       setUser(userData);
-      
+
       // Redirect based on role
       if (userData.role === 'admin') navigate('/admin/dashboard');
       else navigate('/student/dashboard');
-      
+
       return { success: true };
     } catch (err) {
       return { success: false, message: err.response?.data?.message || 'Login failed' };

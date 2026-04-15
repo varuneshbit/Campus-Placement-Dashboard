@@ -406,3 +406,268 @@ body {
   }
 }
 
+/* =========================================
+   7. LOGIN PAGE — KEYFRAMES & UTILITIES
+   ========================================= */
+
+/* ── Keyframes ── */
+@keyframes fadeUp {
+  0%   { opacity: 0; transform: translateY(22px); }
+  100% { opacity: 1; transform: translateY(0);    }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  0%   { opacity: 0; transform: scale(0.92); }
+  100% { opacity: 1; transform: scale(1);    }
+}
+
+@keyframes floatCard {
+  0%, 100% { transform: translateY(0px);   }
+  50%       { transform: translateY(-10px); }
+}
+
+@keyframes gradientMove {
+  0%   { background-position: 0%   50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0%   50%; }
+}
+
+@keyframes gradientPulse {
+  0%, 100% { opacity: 0.15; }
+  50%       { opacity: 0.30; }
+}
+
+/* ── Animated classes ── */
+.login-fade-up {
+  opacity: 0;
+  animation: fadeUp 0.65s ease-out forwards;
+}
+
+.login-fade-in {
+  opacity: 0;
+  animation: fadeIn 0.8s ease-in forwards;
+}
+
+.login-scale-in {
+  opacity: 0;
+  animation: scaleIn 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Form panel slide-up */
+.login-form-anim {
+  animation: fadeUp 0.7s ease-out both;
+}
+
+/* ── Hero gradient overlay ── */
+.login-gradient-bg {
+  background:
+    radial-gradient(ellipse at 60% 30%, rgba(109,40,217,0.35) 0%, transparent 60%),
+    radial-gradient(ellipse at 20% 80%, rgba(29,78,216,0.25) 0%, transparent 55%);
+  background-size: 200% 200%;
+  animation: gradientMove 8s ease-in-out infinite, gradientPulse 6s ease-in-out infinite;
+}
+
+/* ── Dot grid pattern ── */
+.login-grid {
+  background-image: radial-gradient(circle, rgba(255,255,255,0.65) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* ── Gradient text (hero stats / heading accent) ── */
+.login-gradient-text {
+  background: linear-gradient(135deg, #a78bfa 0%, #818cf8 50%, #60a5fa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Submit button ── */
+.login-btn {
+  background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+  box-shadow: 0 4px 18px rgba(124, 58, 237, 0.4);
+}
+.login-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #6d28d9 0%, #4338ca 100%);
+  box-shadow: 0 6px 24px rgba(124, 58, 237, 0.55);
+  transform: scale(1.025) translateY(-1px);
+}
+.login-btn:active:not(:disabled) {
+  transform: scale(0.98);
+  box-shadow: 0 2px 10px rgba(124, 58, 237, 0.3);
+}
+
+/* ── Input focus glow ── */
+.login-input:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+  background: #ffffff;
+}
+
+/* ── Right panel background + orbs via pseudo-elements ── */
+@keyframes orbShift {
+  0%   { background-position: 0% 0%;     opacity: 0.7; }
+  33%  { background-position: 60% 30%;   opacity: 0.9; }
+  66%  { background-position: 30% 80%;   opacity: 0.75; }
+  100% { background-position: 0% 0%;     opacity: 0.7; }
+}
+@keyframes orbShift2 {
+  0%   { background-position: 100% 100%; opacity: 0.6; }
+  40%  { background-position: 20% 50%;   opacity: 0.85; }
+  80%  { background-position: 70% 20%;   opacity: 0.65; }
+  100% { background-position: 100% 100%; opacity: 0.6; }
+}
+
+/* ── NEW: Right panel layered animation keyframes ── */
+@keyframes bgShift {
+  0%   { background-position: 0% 50%;   }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%;   }
+}
+
+@keyframes gridPulse {
+  0%, 100% { opacity: 0.4; }
+  50%       { opacity: 1.0; }
+}
+
+@keyframes orbitDot {
+  from { transform: rotate(0deg)   translateX(var(--orbit-r)) rotate(0deg);    }
+  to   { transform: rotate(360deg) translateX(var(--orbit-r)) rotate(-360deg); }
+}
+
+@keyframes neonPulse {
+  0%, 100% { opacity: 0.25; transform: scale(1);    }
+  50%       { opacity: 0.85; transform: scale(1.05); }
+}
+
+@keyframes rippleBurst {
+  0%   { transform: scale(0.8); opacity: 0.7; }
+  100% { transform: scale(3.5); opacity: 0;   }
+}
+
+@keyframes cornerFade {
+  0%   { opacity: 0; }
+  100% { opacity: 0.6; }
+}
+
+/* ── Right panel base ── */
+.login-right-panel {
+  background: linear-gradient(145deg, #FAFAFE 0%, #F5F3FF 40%, #F8F7FF 70%, #FAFAFE 100%);
+  background-size: 300% 300%;
+  animation: bgShift 10s ease infinite;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Large animated orbs (kept from before) */
+.login-right-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 420px 380px at 10% 10%, rgba(167,139,250,0.30) 0%, transparent 65%),
+    radial-gradient(ellipse 350px 320px at 90% 90%, rgba(99,102,241,0.25) 0%, transparent 65%),
+    radial-gradient(ellipse 250px 220px at 80% 15%, rgba(196,148,253,0.20) 0%, transparent 60%),
+    radial-gradient(ellipse 220px 200px at 15% 80%, rgba(129,140,248,0.18) 0%, transparent 60%);
+  background-size: 200% 200%;
+  filter: blur(48px);
+  animation: orbShift 14s ease-in-out infinite;
+}
+
+/* Pulsing dot grid (replaces old ::after) */
+.login-right-panel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: radial-gradient(circle, rgba(124,58,237,0.09) 1.5px, transparent 1.5px);
+  background-size: 30px 30px;
+  animation: gridPulse 4s ease-in-out infinite;
+  will-change: opacity;
+}
+
+/* ── Orbit ring containers ── */
+.rp-orbit {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  will-change: transform;
+}
+
+.rp-orbit-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border-radius: 50%;
+  will-change: transform;
+  animation: orbitDot linear infinite;
+  /* translate to center the dot on the ring */
+  margin-top: -50%;
+  margin-left: -50%;
+}
+
+/* ── Neon accent lines ── */
+.rp-neon-line {
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: 2px;
+  animation: neonPulse ease-in-out infinite;
+  will-change: opacity, transform;
+}
+
+/* ── Ripple burst circles ── */
+.rp-ripple {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(124,58,237,0.25);
+  pointer-events: none;
+  z-index: 0;
+  animation: rippleBurst 4s ease-out infinite;
+  will-change: transform, opacity;
+}
+
+/* ── Corner bracket pieces ── */
+.rp-corner {
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  animation: cornerFade 1.2s ease forwards;
+}
+.rp-corner-h {
+  height: 1px;
+  background: rgba(124,58,237,0.2);
+}
+.rp-corner-v {
+  width: 1px;
+  background: rgba(124,58,237,0.2);
+}
+
+/* ── Mobile: hide all background animation elements ── */
+@media (max-width: 767px) {
+  .rp-orbit,
+  .rp-neon-line,
+  .rp-ripple,
+  .rp-corner {
+    display: none;
+  }
+}
+
+/* Hide scrollbar on login page only */
+.login-page {
+  overflow: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.login-page::-webkit-scrollbar {
+  display: none;
+}
