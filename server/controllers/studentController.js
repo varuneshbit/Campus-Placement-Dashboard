@@ -604,7 +604,8 @@ exports.deleteStudent = async (req, res) => {
 // @route   GET /api/students/eligible
 exports.getEligibleStudents = async (req, res) => {
   try {
-    const { minCGPA, branches } = req.query;
+    const { minCGPA, branches, driveId } = req.query;
+    const PlacementDrive = require('../models/PlacementDrive');
 
     const filter = {
       isDeleted: false,
@@ -621,6 +622,19 @@ exports.getEligibleStudents = async (req, res) => {
       const branchList = branches.split(',').map(b => b.trim()).filter(Boolean);
       if (branchList.length > 0) {
         filter.branch = { $in: branchList };
+      }
+    }
+
+    // If driveId is provided, restrict to students who have applied to that drive
+    if (driveId) {
+      const drive = await PlacementDrive.findById(driveId).select('applicants');
+      if (drive && drive.applicants && drive.applicants.length > 0) {
+        // applicants.studentId references User IDs
+        const applicantUserIds = drive.applicants.map(a => a.studentId);
+        filter.user = { $in: applicantUserIds };
+      } else {
+        // Drive has no applicants — return empty list
+        return res.json({ success: true, students: [], total: 0 });
       }
     }
 

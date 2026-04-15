@@ -19,6 +19,7 @@ import StudentLayout from '../components/StudentLayout';
 const StudentDrives = () => {
   const [drives, setDrives] = useState([]);
   const [interviews, setInterviews] = useState([]);
+  const [studentProfile, setStudentProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedDrive, setSelectedDrive] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -32,12 +33,14 @@ const StudentDrives = () => {
   const fetchData = async () => {
     try {
       const token = localStorage.getItem('token');
-      const [driveRes, intRes] = await Promise.all([
+      const [driveRes, intRes, profileRes] = await Promise.all([
         axios.get('/api/drives', { headers: { Authorization: `Bearer ${token}` }}),
-        axios.get('/api/interviews/student', { headers: { Authorization: `Bearer ${token}` }})
+        axios.get('/api/interviews/student', { headers: { Authorization: `Bearer ${token}` }}),
+        axios.get('/api/students/profile', { headers: { Authorization: `Bearer ${token}` }})
       ]);
       setDrives(driveRes.data.data);
       setInterviews(intRes.data.data);
+      setStudentProfile(profileRes.data.data);
       setLoading(false);
     } catch (err) {
       console.error(err);
@@ -97,6 +100,9 @@ const StudentDrives = () => {
               <p>Loading drives...</p>
             ) : drives.map(drive => {
               const isApplied = drive.applicants.some(a => a.studentId === user.id);
+              const minCGPA = drive.eligibility?.minCGPA || 0;
+              const isEligible = studentProfile ? studentProfile.cgpa >= minCGPA : false;
+              
               return (
                 <div key={drive._id} className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-xl transition-all group overflow-hidden relative">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-bl-full -mr-16 -mt-16 group-hover:bg-indigo-500/10 transition-colors"></div>
@@ -139,11 +145,13 @@ const StudentDrives = () => {
                       <Info size={18} /> Details
                     </button>
                     <button 
-                      disabled={isApplied || drive.registrationStatus !== 'open'}
+                      disabled={isApplied || drive.registrationStatus !== 'open' || !isEligible}
                       onClick={() => handleApply(drive._id)}
                       className={`flex-[1.5] py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 ${
                         isApplied 
                           ? 'bg-emerald-50 text-emerald-600 cursor-default border border-emerald-100' 
+                          : !isEligible 
+                          ? 'bg-rose-50 text-rose-500 cursor-not-allowed border border-rose-100'
                           : drive.registrationStatus === 'open'
                           ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-600/20 hover:-translate-y-1'
                           : 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
@@ -151,6 +159,8 @@ const StudentDrives = () => {
                     >
                       {isApplied ? (
                         <><CheckCircle size={18} /> Applied</>
+                      ) : !isEligible ? (
+                        <><X size={18} /> Not Eligible</>
                       ) : drive.registrationStatus === 'open' ? (
                         <><Zap size={18} /> Apply Now</>
                       ) : (
@@ -211,7 +221,7 @@ const StudentDrives = () => {
             </div>
             <div className="px-8 py-5 border-t border-slate-100 bg-slate-50 flex flex-col md:flex-row items-center justify-end gap-3">
                <button onClick={() => setShowModal(false)} className="w-full md:w-auto px-6 py-3 rounded-xl border border-slate-200 text-slate-700 font-semibold hover:bg-white hover:text-slate-900 transition-all">Close Details</button>
-               {!selectedDrive.applicants.some(a => a.studentId === user.id) && selectedDrive.registrationStatus === 'open' && (
+               {selectedDrive && studentProfile && !selectedDrive.applicants.some(a => a.studentId === user.id) && selectedDrive.registrationStatus === 'open' && studentProfile.cgpa >= (selectedDrive.eligibility?.minCGPA || 0) && (
                   <button 
                     onClick={() => {
                         handleApply(selectedDrive._id); 
@@ -222,7 +232,12 @@ const StudentDrives = () => {
                      <Zap size={18}/> Apply Now
                   </button>
                )}
-               {selectedDrive.applicants.some(a => a.studentId === user.id) && (
+               {selectedDrive && studentProfile && !selectedDrive.applicants.some(a => a.studentId === user.id) && selectedDrive.registrationStatus === 'open' && studentProfile.cgpa < (selectedDrive.eligibility?.minCGPA || 0) && (
+                  <button disabled className="w-full md:w-auto px-6 py-3 rounded-xl bg-rose-50 text-rose-500 font-bold border border-rose-100 flex items-center justify-center gap-2 cursor-not-allowed">
+                     <X size={18}/> Not Eligible (CGPA)
+                  </button>
+               )}
+               {selectedDrive && selectedDrive.applicants.some(a => a.studentId === user.id) && (
                   <button disabled className="w-full md:w-auto px-6 py-3 rounded-xl bg-emerald-50 text-emerald-600 font-bold border border-emerald-200 flex items-center justify-center gap-2 cursor-default">
                      <CheckCircle size={18}/> Applied Successfully
                   </button>

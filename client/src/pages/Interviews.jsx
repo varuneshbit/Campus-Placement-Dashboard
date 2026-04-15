@@ -298,12 +298,8 @@ const Interviews = () => {
       if (!selectedDrive) return;
 
       const params = new URLSearchParams();
-      if (selectedDrive.eligibility?.minCGPA) {
-        params.append('minCGPA', selectedDrive.eligibility.minCGPA);
-      }
-      if (selectedDrive.eligibility?.branches?.length > 0) {
-        params.append('branches', selectedDrive.eligibility.branches.join(','));
-      }
+      // Always pass driveId so only applicants of that drive are returned
+      params.append('driveId', driveId);
 
       const res = await axios.get(`/api/students/eligible?${params.toString()}`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -850,8 +846,8 @@ const Interviews = () => {
               {bulkStep === 2 && (
                 <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300 flex flex-col h-full">
                   <div className="flex-shrink-0">
-                    <h4 className="text-lg font-bold text-slate-800 mb-2">Step 2: Select Eligible Students</h4>
-                    <p className="text-sm text-slate-500 mb-4">Found {eligibleStudents.length} eligible students based on drive criteria.</p>
+                    <h4 className="text-lg font-bold text-slate-800 mb-2">Step 2: Select Students Who Applied</h4>
+                    <p className="text-sm text-slate-500 mb-4">Found {eligibleStudents.length} students who applied for this drive.</p>
                     
                     <div className="flex flex-col gap-3 mb-4">
                       <div className="flex flex-col sm:flex-row gap-3">
@@ -949,7 +945,7 @@ const Interviews = () => {
                         </label>
                       ))}
                       {eligibleStudents.length === 0 && !loadingEligible && (
-                         <div className="p-8 text-center text-slate-500">No eligible students found.</div>
+                         <div className="p-8 text-center text-slate-500">No students who applied were found.</div>
                       )}
                     </div>
                   )}
