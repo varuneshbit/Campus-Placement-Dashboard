@@ -37,22 +37,22 @@ const seedDatabase = async () => {
 
     // Insert in dependency order
     // Passwords in the export are already bcrypt-hashed — insert directly
-    await User.insertMany(users, { lean: true });
+    await User.insertMany(users);
     console.log(`✅ Users inserted: ${users.length}`);
 
-    await Company.insertMany(companies, { lean: true });
+    await Company.insertMany(companies);
     console.log(`✅ Companies inserted: ${companies.length}`);
 
-    await Student.insertMany(students, { lean: true });
+    await Student.insertMany(students);
     console.log(`✅ Students inserted: ${students.length}`);
 
-    await PlacementDrive.insertMany(drives, { lean: true });
+    await PlacementDrive.insertMany(drives);
     console.log(`✅ Drives inserted: ${drives.length}`);
 
-    await Interview.insertMany(interviews, { lean: true });
+    await Interview.insertMany(interviews);
     console.log(`✅ Interviews inserted: ${interviews.length}`);
 
-    await Event.insertMany(events, { lean: true });
+    await Event.insertMany(events);
     console.log(`✅ Events inserted: ${events.length}`);
 
     console.log('');
