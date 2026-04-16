@@ -42,7 +42,7 @@ const Companies = () => {
   const fetchCompanies = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/companies', {
+      const res = await axios.get('/api/companies', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setCompanies(res.data.data);
@@ -84,11 +84,11 @@ const Companies = () => {
     try {
       const token = localStorage.getItem('token');
       if (editingCompany) {
-        await axios.put(`http://localhost:5000/api/companies/${editingCompany._id}`, data, {
+        await axios.put(`/api/companies/${editingCompany._id}`, data, {
           headers: { Authorization: `Bearer ${token}` }
         });
       } else {
-        await axios.post('http://localhost:5000/api/companies', data, {
+        await axios.post('/api/companies', data, {
           headers: { Authorization: `Bearer ${token}` }
         });
       }
@@ -103,7 +103,7 @@ const Companies = () => {
     if (!window.confirm('Are you sure you want to delete this company?')) return;
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:5000/api/companies/${id}`, {
+      await axios.delete(`/api/companies/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchCompanies();

@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
 
   const loadUser = async (token) => {
     try {
-      const res = await axios.get('http://localhost:5000/api/auth/profile', {
+      const res = await axios.get('/api/auth/profile', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUser(res.data.data);
@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/register', userData);
+      const res = await axios.post('/api/auth/register', userData);
       const { token, user: newUserData } = res.data;
       localStorage.setItem('token', token);
       setUser(newUserData);
@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password, expectedRole) => {
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', { email, password });
+      const res = await axios.post('/api/auth/login', { email, password });
       const { token, user: userData } = res.data;
 
       // Block login if the selected role doesn't match the account's actual role

@@ -37,7 +37,7 @@ const Students = () => {
         try {
             setLoading(true);
             const token = localStorage.getItem('token');
-            const res = await axios.get('http://localhost:5000/api/students', {
+            const res = await axios.get('/api/students', {
                 headers: { Authorization: `Bearer ${token}` },
                 params: {
                     page,
@@ -105,7 +105,7 @@ const Students = () => {
         const toastId = toast.loading('Uploading Excel file...');
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.post('http://localhost:5000/api/students/bulk-upload', formData, {
+            const res = await axios.post('/api/students/bulk-upload', formData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'multipart/form-data'
@@ -131,7 +131,7 @@ const Students = () => {
                 search: searchTerm
             }).toString();
 
-            const res = await axios.get(`http://localhost:5000/api/students/export?${params}`, {
+            const res = await axios.get(`/api/students/export?${params}`, {
                 headers: { Authorization: `Bearer ${token}` },
                 responseType: 'blob'
             });
@@ -153,7 +153,7 @@ const Students = () => {
     const handleStatusChange = async (id, newStatus) => {
         try {
             const token = localStorage.getItem('token');
-            await axios.put(`http://localhost:5000/api/students/${id}/status`, { status: newStatus }, {
+            await axios.put(`/api/students/${id}/status`, { status: newStatus }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             toast.success(`Status updated to ${newStatus}`);
@@ -167,7 +167,7 @@ const Students = () => {
         try {
             const token = localStorage.getItem('token');
             const endpoint = currentIsBlocked ? 'unblock' : 'block';
-            await axios.put(`http://localhost:5000/api/students/${id}/${endpoint}`, {}, {
+            await axios.put(`/api/students/${id}/${endpoint}`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             toast.success(currentIsBlocked ? 'Student unblocked successfully' : 'Student blocked successfully');
@@ -184,7 +184,7 @@ const Students = () => {
         if (!window.confirm('Are you sure you want to delete this student record completely?')) return;
         try {
             const token = localStorage.getItem('token');
-            await axios.delete(`http://localhost:5000/api/students/${id}`, {
+            await axios.delete(`/api/students/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             toast.success('Student deleted');
@@ -202,7 +202,7 @@ const Students = () => {
         const toastId = toast.loading('Adding student...');
         try {
             const token = localStorage.getItem('token');
-            await axios.post('http://localhost:5000/api/students', newStudent, {
+            await axios.post('/api/students', newStudent, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             toast.success('Student added successfully', { id: toastId });
@@ -371,7 +371,7 @@ const Students = () => {
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-primary font-bold overflow-hidden">
                                                 {student.profileImageURL ? (
-                                                    <img src={`http://localhost:5000${student.profileImageURL}`} className="w-full h-full object-cover" alt="Profile" />
+                                                    <img src={`${student.profileImageURL}`} className="w-full h-full object-cover" alt="Profile" />
                                                 ) : (
                                                     student.name ? student.name.charAt(0).toUpperCase() : (student.user?.name ? student.user.name.charAt(0).toUpperCase() : 'U')
                                                 )}
@@ -516,7 +516,7 @@ const Students = () => {
                             <div className="flex items-center gap-5">
                                 <div className="w-20 h-20 bg-slate-100 rounded-3xl flex items-center justify-center text-primary font-bold text-3xl overflow-hidden shadow-inner">
                                     {viewingStudent.profileImageURL ? (
-                                        <img src={`http://localhost:5000${viewingStudent.profileImageURL}`} className="w-full h-full object-cover" alt="Profile" />
+                                        <img src={`${viewingStudent.profileImageURL}`} className="w-full h-full object-cover" alt="Profile" />
                                     ) : (
                                         viewingStudent.name ? viewingStudent.name.charAt(0).toUpperCase() : (viewingStudent.user?.name ? viewingStudent.user.name.charAt(0).toUpperCase() : 'U')
                                     )}

@@ -36,7 +36,7 @@ const Analytics = () => {
         const fetchAnalytics = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const res = await axios.get('http://localhost:5000/api/analytics', {
+                const res = await axios.get('/api/analytics', {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 if (res.data.success) {
@@ -56,7 +56,7 @@ const Analytics = () => {
         const toastId = toast.loading('Generating report...');
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get('http://localhost:5000/api/reports/students?format=excel', {
+            const res = await axios.get('/api/reports/students?format=excel', {
                 headers: { Authorization: `Bearer ${token}` },
                 responseType: 'blob'
             });

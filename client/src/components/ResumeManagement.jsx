@@ -64,7 +64,7 @@ const ResumeManagement = () => {
 
     const handleDownload = () => {
         if (!resume) return;
-        window.open(`http://localhost:5000${resume}`, '_blank');
+        window.open(`${resume}`, '_blank');
     };
 
     const handleAnalyze = async () => {

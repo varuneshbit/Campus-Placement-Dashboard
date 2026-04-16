@@ -47,7 +47,7 @@ const AdminDrives = () => {
   const fetchDrives = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/drives', {
+      const res = await axios.get('/api/drives', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setDrives(res.data.data);
@@ -60,7 +60,7 @@ const AdminDrives = () => {
   const fetchCompanies = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/companies', {
+      const res = await axios.get('/api/companies', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setCompanies(res.data.data);
@@ -72,7 +72,7 @@ const AdminDrives = () => {
   const handleOpenApplicants = async (driveId) => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`http://localhost:5000/api/drives/${driveId}/applicants`, {
+      const res = await axios.get(`/api/drives/${driveId}/applicants`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setCurrentApplicants(res.data.data);
@@ -100,7 +100,7 @@ const AdminDrives = () => {
   const onSubmit = async (data) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:5000/api/drives', data, {
+      await axios.post('/api/drives', data, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setShowModal(false);
@@ -114,7 +114,7 @@ const AdminDrives = () => {
     try {
       const token = localStorage.getItem('token');
       const newStatus = drive.registrationStatus === 'open' ? 'closed' : 'open';
-      await axios.put(`http://localhost:5000/api/drives/${drive._id}`, 
+      await axios.put(`/api/drives/${drive._id}`, 
         { registrationStatus: newStatus },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -128,7 +128,7 @@ const AdminDrives = () => {
     if (window.confirm('Are you sure you want to delete this placement drive?')) {
       try {
         const token = localStorage.getItem('token');
-        await axios.delete(`http://localhost:5000/api/drives/${driveId}`, {
+        await axios.delete(`/api/drives/${driveId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         fetchDrives();
@@ -360,7 +360,7 @@ const AdminDrives = () => {
                             <Calendar size={18} />
                          </button>
                          <button 
-                           onClick={() => window.open(`http://localhost:5000${app.studentId?.resumeURL}`, '_blank')}
+                           onClick={() => window.open(`${app.studentId?.resumeURL}`, '_blank')}
                            className="p-2 text-primary hover:bg-primary/10 rounded-lg transition-all"
                            title="Download Resume"
                          >
