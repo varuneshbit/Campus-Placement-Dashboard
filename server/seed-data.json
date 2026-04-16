@@ -189,6 +189,16 @@
       "createdAt": "2026-03-25T05:59:09.711Z",
       "updatedAt": "2026-03-25T05:59:09.711Z",
       "__v": 0
+    },
+    {
+      "_id": "69defd5638d00ebedd8d3803",
+      "name": "MoneshVel S T",
+      "email": "monesvel@university.edu",
+      "password": "$2b$10$06LDun5tH.ozzeFdNJS3ruoFMflgtR7U5euKugJKe0iV5AIILp58i",
+      "role": "student",
+      "createdAt": "2026-04-15T02:52:06.153Z",
+      "updatedAt": "2026-04-15T02:52:06.153Z",
+      "__v": 0
     }
   ],
   "students": [
@@ -604,7 +614,7 @@
       "branch": "ECE",
       "cgpa": 9.4,
       "backlogs": 0,
-      "resumeURL": "https://res.cloudinary.com/demo/raw/upload/kavya_resume.pdf",
+      "resumeURL": "/uploads/resumes/69c379adecedd6bceddb66f8-1774504547912.pdf",
       "phone": "9876543219",
       "skills": [
         "Python",
@@ -613,10 +623,33 @@
       ],
       "projects": [],
       "resumeAnalysis": {
-        "strengths": [],
-        "weaknesses": [],
-        "missingSkills": [],
-        "suggestions": []
+        "score": 72,
+        "strengths": [
+          "Strong academic standing with a CGPA of 8.12",
+          "Diverse technical stack covering both MERN and Spring Boot",
+          "Research experience with a published paper on a Music Recommendation System",
+          "Active participation in hackathons and industry-related programs"
+        ],
+        "weaknesses": [
+          "Significant misalignment between the specialized degree (AI/ML) and the project portfolio (mostly Web Dev)",
+          "Generic professional summary that lacks specific value propositions",
+          "Timeline inconsistency with future-dated projects (July 2025)",
+          "Lack of measurable metrics or results in the project descriptions"
+        ],
+        "missingSkills": [
+          "Python (essential for AI/ML students)",
+          "Machine Learning libraries (Scikit-learn, TensorFlow, or PyTorch)",
+          "Version Control (Git)",
+          "Cloud Platforms (AWS/Azure/Firebase)",
+          "Data Analysis tools (Pandas, NumPy)"
+        ],
+        "suggestions": [
+          "Add specific AI/ML projects to the resume to align with your B.Tech specialization",
+          "Correct the project dates to ensure they reflect past or current work, not future dates",
+          "Quantify achievements in projects (e.g., 'reduced load time by 20%' or 'achieved 90% accuracy')",
+          "Include a link to the published research paper or provide a DOI for verification",
+          "Tailor the 'About Me' section to highlight specific technical interests rather than generic soft skills"
+        ]
       },
       "placementStatus": "Placed",
       "isBlocked": false,
@@ -625,7 +658,7 @@
       "isDeleted": false,
       "profileCompletionPct": 97,
       "createdAt": "2026-03-25T05:59:09.278Z",
-      "updatedAt": "2026-03-25T05:59:09.278Z",
+      "updatedAt": "2026-04-15T02:53:58.043Z",
       "__v": 0
     },
     {
@@ -675,7 +708,7 @@
       "branch": "IT",
       "cgpa": 9.3,
       "backlogs": 0,
-      "resumeURL": "https://res.cloudinary.com/demo/raw/upload/neha_resume.pdf",
+      "resumeURL": "/uploads/resumes/69c379adecedd6bceddb6700-1774522140746.pdf",
       "phone": "9876543221",
       "skills": [
         "Cybersecurity",
@@ -684,10 +717,33 @@
       ],
       "projects": [],
       "resumeAnalysis": {
-        "strengths": [],
-        "weaknesses": [],
-        "missingSkills": [],
-        "suggestions": []
+        "score": 72,
+        "strengths": [
+          "Strong academic standing with an 8.12 CGPA.",
+          "Published research paper in the field of Music Recommendation Systems.",
+          "Demonstrated full-stack development capability with both MERN and Spring Boot.",
+          "Active participation in external hackathons and industry-related programs."
+        ],
+        "weaknesses": [
+          "Significant skill-gap between the degree major (AI/ML) and the technical skills listed (primarily Web Dev).",
+          "Inconsistent or future-dated project timelines (e.g., projects listed for July 2025).",
+          "Lack of specific AI/ML tools or libraries (like Scikit-learn, TensorFlow) in the skills section despite the major.",
+          "Absence of professional internship experience."
+        ],
+        "missingSkills": [
+          "Python (critical for AI/ML)",
+          "Machine Learning Frameworks (TensorFlow, PyTorch, or Scikit-Learn)",
+          "Data Analysis libraries (Pandas, NumPy)",
+          "Version Control (Git/GitHub)",
+          "Cloud Services (AWS, Azure, or GCP)"
+        ],
+        "suggestions": [
+          "Align the skills section with your AI/ML major by adding Python and relevant ML libraries.",
+          "Correct the project dates to ensure they reflect past or current work accurately.",
+          "Incorporate more AI-focused projects to complement your web development experience.",
+          "Quantify the results of your projects (e.g., 'improved accuracy by X%' or 'reduced latency by Y%').",
+          "Refine the 'About Me' section to be more specific to your career goals in AI or Web Development."
+        ]
       },
       "placementStatus": "Placed",
       "isBlocked": false,
@@ -696,7 +752,7 @@
       "isDeleted": false,
       "profileCompletionPct": 96,
       "createdAt": "2026-03-25T05:59:09.401Z",
-      "updatedAt": "2026-03-25T05:59:09.401Z",
+      "updatedAt": "2026-03-26T10:49:12.111Z",
       "__v": 0
     },
     {
@@ -1119,6 +1175,68 @@
       "createdAt": "2026-03-25T05:59:09.778Z",
       "updatedAt": "2026-03-25T05:59:09.778Z",
       "__v": 0
+    },
+    {
+      "_id": "69defd568797c615541bb05b",
+      "__v": 1,
+      "backlogs": 0,
+      "batch": "2022",
+      "branch": "Computer Science",
+      "createdAt": "2026-04-15T02:52:06.361Z",
+      "email": "monesvel@university.edu",
+      "isBlocked": false,
+      "isDeleted": false,
+      "isRegistered": true,
+      "name": "MoneshVel S T",
+      "placementStatus": "Not Placed",
+      "profileCompletionPct": 0,
+      "projects": [],
+      "resumeAnalysis": {
+        "score": 68,
+        "strengths": [
+          "Strong academic performance in B.Tech with an 8.12 CGPA",
+          "Published a research paper in a relevant field (Music Recommendation System)",
+          "Practical full-stack project experience using MERN and Spring Boot",
+          "Experience with AI integration (Gemini API) in web applications"
+        ],
+        "weaknesses": [
+          "Lack of core AI/ML libraries and languages (Python, Scikit-learn, PyTorch) despite the degree specialization",
+          "Typo or logical error in project dates (listing future dates like OCT 2025 - JAN 2026)",
+          "Secondary (SSLC) and Higher Secondary (HSC) scores are relatively low",
+          "Absence of formal professional internship experience"
+        ],
+        "missingSkills": [
+          "Python (Programming Language)",
+          "Machine Learning Frameworks (TensorFlow, PyTorch, or Scikit-learn)",
+          "Git/Version Control",
+          "Cloud Platforms (AWS, Azure, or GCP)",
+          "Data Analysis tools (Pandas, NumPy)",
+          "Docker/Containerization"
+        ],
+        "suggestions": [
+          "Add Python and AI-specific frameworks to your technical skills to match your B.Tech specialization",
+          "Correct the timelines for your projects; using future dates can be confusing to recruiters",
+          "Highlight the specific algorithms or models used in your 'Rhythm Lofi' research paper",
+          "Include a section for certifications (e.g., Coursera, Udacity) to bolster your AI/ML profile",
+          "Quantify the impact of your projects (e.g., accuracy of the recommendation system, number of users handled by the dashboard)"
+        ]
+      },
+      "rollNumber": "CSE2024515",
+      "skills": [
+        "Node.js",
+        "Python",
+        "SQL",
+        "React"
+      ],
+      "source": "self-register",
+      "updatedAt": "2026-04-15T02:56:37.399Z",
+      "user": "69defd5638d00ebedd8d3803",
+      "userId": "69defd5638d00ebedd8d3803",
+      "resumeURL": "/uploads/resumes/69defd5638d00ebedd8d3803-1776221547565.pdf",
+      "cgpa": 9.6,
+      "phone": "8838075967",
+      "tenthPercentage": 98,
+      "twelfthPercentage": 99
     }
   ],
   "companies": [
@@ -1241,6 +1359,22 @@
       "__v": 0,
       "createdAt": "2026-03-25T05:59:08.644Z",
       "updatedAt": "2026-03-25T05:59:08.644Z"
+    },
+    {
+      "_id": "69df998ac4302388d143aab0",
+      "companyName": "GOOGLE",
+      "salary": "44",
+      "location": "Bengaluru, India",
+      "companyDescription": "MNC COMPANY",
+      "hiringStats": {
+        "previousOffers": -1,
+        "lastHiringYear": "",
+        "topSkills": []
+      },
+      "history": [],
+      "createdAt": "2026-04-15T13:58:34.972Z",
+      "updatedAt": "2026-04-15T13:58:34.972Z",
+      "__v": 0
     }
   ],
   "drives": [
@@ -1265,7 +1399,7 @@
       "applicants": [],
       "__v": 0,
       "createdAt": "2026-03-25T05:59:09.782Z",
-      "updatedAt": "2026-03-25T05:59:09.782Z"
+      "updatedAt": "2026-03-26T05:54:09.059Z"
     },
     {
       "_id": "69c379adecedd6bceddb672b",
@@ -1306,10 +1440,26 @@
         ]
       },
       "registrationStatus": "open",
-      "applicants": [],
-      "__v": 0,
+      "applicants": [
+        {
+          "studentId": "69c379adecedd6bceddb66f8",
+          "_id": "69c4ca3b95b292492bb22b4c",
+          "appliedAt": "2026-03-26T05:55:07.192Z"
+        },
+        {
+          "studentId": "69defd5638d00ebedd8d3803",
+          "_id": "69defd8138d00ebedd8d3882",
+          "appliedAt": "2026-04-15T02:52:49.104Z"
+        },
+        {
+          "studentId": "69c379acecedd6bceddb66cf",
+          "_id": "69df8f96ea7a1ba28ad1894f",
+          "appliedAt": "2026-04-15T13:16:06.973Z"
+        }
+      ],
+      "__v": 3,
       "createdAt": "2026-03-25T05:59:09.782Z",
-      "updatedAt": "2026-03-25T05:59:09.782Z"
+      "updatedAt": "2026-04-15T13:16:06.980Z"
     },
     {
       "_id": "69c379adecedd6bceddb672d",
@@ -1349,11 +1499,22 @@
           "ECE"
         ]
       },
-      "registrationStatus": "upcoming",
-      "applicants": [],
-      "__v": 0,
+      "registrationStatus": "open",
+      "applicants": [
+        {
+          "studentId": "69defd5638d00ebedd8d3803",
+          "_id": "69df01649467a73b5c467754",
+          "appliedAt": "2026-04-15T03:09:24.576Z"
+        },
+        {
+          "studentId": "69c379acecedd6bceddb66cf",
+          "_id": "69df8fc8ea7a1ba28ad189e4",
+          "appliedAt": "2026-04-15T13:16:56.785Z"
+        }
+      ],
+      "__v": 2,
       "createdAt": "2026-03-25T05:59:09.782Z",
-      "updatedAt": "2026-03-25T05:59:09.782Z"
+      "updatedAt": "2026-04-15T13:16:56.788Z"
     },
     {
       "_id": "69c379adecedd6bceddb672f",
@@ -1372,11 +1533,42 @@
           "IT"
         ]
       },
-      "registrationStatus": "upcoming",
-      "applicants": [],
-      "__v": 0,
+      "registrationStatus": "open",
+      "applicants": [
+        {
+          "studentId": "69defd5638d00ebedd8d3803",
+          "_id": "69df01679467a73b5c467765",
+          "appliedAt": "2026-04-15T03:09:27.885Z"
+        }
+      ],
+      "__v": 1,
       "createdAt": "2026-03-25T05:59:09.782Z",
-      "updatedAt": "2026-03-25T05:59:09.782Z"
+      "updatedAt": "2026-04-15T03:09:27.887Z"
+    },
+    {
+      "_id": "69df99d2c4302388d143aad3",
+      "driveName": "Google SDE",
+      "companyId": "69df998ac4302388d143aab0",
+      "jobRole": "SDE",
+      "jobDescription": "Devlop and Manage Softwares",
+      "salary": "44",
+      "date": "2026-04-28T00:00:00.000Z",
+      "batch": "2022",
+      "eligibility": {
+        "minCGPA": 9,
+        "branches": []
+      },
+      "registrationStatus": "open",
+      "applicants": [
+        {
+          "studentId": "69defd5638d00ebedd8d3803",
+          "_id": "69df99efc4302388d143abde",
+          "appliedAt": "2026-04-15T14:00:15.237Z"
+        }
+      ],
+      "createdAt": "2026-04-15T13:59:46.887Z",
+      "updatedAt": "2026-04-15T14:00:15.239Z",
+      "__v": 1
     }
   ],
   "interviews": [
